@@ -9,4 +9,7 @@ Python, Pandas, Plotly, Scikit-learn, Streamlit
 
 TODO : 
 requirements,
+
+pip freeze > requirements.txt
+
 lien vers streamlit
