@@ -5,12 +5,8 @@ Prédire à l’avance cette pollution permet de prévenir dans le cas de l’ap
 Ce projet s'inscrit dans notre cursus Data Scientest - Novembre 2024.
 
 # Technologies
-Python 
-Pandas
-Scikit-learn
-Streamlit
-Plotly
+Python, Pandas, Plotly, Scikit-learn, Streamlit
 
 TODO : 
-requirements
+requirements,
 lien vers streamlit
