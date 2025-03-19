@@ -1,0 +1,454 @@
+
+
+def analyser_variable_categorielle_plotly(df, variable, top_n=100, display_array=True):
+  """
+  Analyse une variable catégorielle en affichant un DataFrame des 'top_n' catégories les plus fréquentes, ainsi qu'un graphique.
+
+  :param df: DataFrame contenant la variable à analyser.
+  :param variable: Nom de la variable catégorielle.
+  :param top_n: Nombre de catégories à afficher (par défaut 100).
+  """
+
+  if display_array == True:
+    top_cat = f"(Top {top_n} catégories)" if top_n != 100 else ""
+    print(f"\n Analyse de la variable : {variable} {top_cat}")
+
+  # Calcul des fréquences et pourcentages
+  category_counts = df[variable].value_counts().head(top_n)
+  category_percent = df[variable].value_counts(normalize=True).head(top_n) * 100
+
+  # Création d’un DataFrame avec Libellé, Total et Pourcentage
+  df_summary = pd.DataFrame({
+      "Libellé": category_counts.index,
+      "Total": category_counts.values,
+      "Pourcentage": category_percent.values
+  })
+
+  # Affichage du tableau de synthèse
+  display(df_summary)
+
+  # Création du graphique interactif avec Plotly
+  nb = top_n
+  if top_n == 100:
+    nb = ""
+  fig = px.bar(df_summary,
+                x="Libellé",
+                y="Total",
+                text="Total",
+                title=f'Distribution des {nb} premières catégories de {variable}',
+                labels={"Libellé": variable, "Total": "Nombre d'occurrences"},
+                template="plotly_white")
+
+  fig.update_traces(textposition='outside')
+  fig.update_layout(xaxis_tickangle=-45)
+
+  # Affichage du graphique
+  fig.show()
+
+def analyser_variables_numeriques_plotly(df, variables, bins=30):
+    """
+    Analyse les variables numériques en affichant un histogramme + KDE (distribution) et un boxplot interactifs.
+
+    :param df: DataFrame contenant les données.
+    :param variables: Liste des variables numériques à analyser.
+    :param bins: Nombre de bins pour l'histogramme (par défaut 30).
+    """
+    for var in variables:
+        #print(f"\n Analyse de la variable : {var}")
+        #display(df[var].describe())  # Affichage des statistiques descriptives
+
+        # Supprimer les valeurs NaN
+        data = df[var].dropna()
+
+        # Histogramme
+        hist = go.Histogram(
+            x=data,
+            nbinsx=bins,
+            marker=dict(color='skyblue', line=dict(color='black', width=1)),  # Bordures noires
+            opacity=0.6,  # Semi-transparent pour voir la KDE
+            name="Histogramme"
+        )
+
+        # Calcul des densités pour la courbe KDE
+        kde = gaussian_kde(data)
+        x_vals = np.linspace(data.min(), data.max(), 500)  # Intervalle lissé
+        kde_vals = kde(x_vals)
+
+        # Courbe KDE
+        kde_curve = go.Scatter(
+            x=x_vals,
+            y=kde_vals * len(data) * (data.max() - data.min()) / bins,  # Mise à l'échelle par rapport à l'histogramme
+            mode='lines',
+            line=dict(color='blue', width=2),
+            name="Densité (KDE)"
+        )
+
+        # Création de la figure combinée
+        fig = go.Figure(data=[hist, kde_curve])
+
+        # Mise en page
+        fig.update_layout(
+            title=f'Distribution de {var} (Histogramme + KDE)',
+            xaxis_title="Valeur",
+            yaxis_title="Fréquence",
+            template="plotly_white",
+            barmode='overlay'
+        )
+
+        # Affichage du graphique combiné
+        fig.show()
+
+        # Création du boxplot
+        boxplot = go.Box(
+            x=data,
+            marker=dict(color='salmon'),
+            name="Boxplot",
+            boxpoints="outliers"  # Affichage des outliers
+        )
+
+        # Création et affichage du Boxplot
+        fig_box = go.Figure(data=[boxplot])
+        fig_box.update_layout(
+            title=f'Boxplot de {var}',
+            xaxis_title="Valeur",
+            template="plotly_white"
+        )
+
+        fig_box.show()
+
+
+def display_missing_values(df):
+  """
+  Affiche un DataFrame contenant les valeurs manquantes, leur pourcentage / nombre et leur type, pour chaque colonne du DataFrame.
+
+  :param df: DataFrame contenant la variable à analyser.
+  """
+  missing_values = df.isnull().sum()
+  missing_ratio = (missing_values / len(df)) * 100
+
+  missing_values_df = pd.DataFrame({
+      'Colonne': missing_values.index,
+      'Valeurs manquantes (%)': missing_ratio.values,
+      'Nombre de valeurs manquantes': missing_values.values,
+      'Type': df.dtypes.values
+  })
+
+  missing_values_df = missing_values_df[missing_values_df['Nombre de valeurs manquantes'] > 0]
+  missing_values_df = missing_values_df.sort_values(by='Valeurs manquantes (%)', ascending=False).reset_index(drop=True)
+
+  return missing_values_df
+
+def afficher_boxplot(df, colonne, couleur="blue"):
+  """
+  Affiche un boxplot interactif pour une variable donnée.
+
+  :param df: DataFrame contenant les données.
+  :param colonne: Nom de la colonne à analyser.
+  :param couleur: Couleur du boxplot (par défaut 'blue').
+  """
+
+  # Création de la figure
+  fig = go.Figure()
+
+  # Ajout du boxplot
+  fig.add_trace(go.Box(
+      x=df[colonne].dropna(),
+      name=colonne,
+      marker_color=couleur
+  ))
+
+  # Mise en page
+  fig.update_layout(
+      title=f"Box Plot des valeurs de {colonne}",
+      xaxis_title=colonne,
+      showlegend=False
+  )
+
+  # Affichage du graphique
+  fig.show()
+
+def plot_correlation_matrix(df):
+  """
+  Affiche la matrice de corrélation des variables numériques sous forme de heatmap interactive avec Plotly.
+
+  :param df: DataFrame Pandas contenant les données
+  """
+  # Sélection des colonnes numériques
+  num_numeric_cols = df.select_dtypes(include=['number']).columns
+
+  # Calcul de la matrice de corrélation
+  corr_matrix = df[num_numeric_cols].corr()
+
+  # Création de la heatmap avec Plotly (labels en bas et à gauche)
+  fig = ff.create_annotated_heatmap(
+      z=corr_matrix.values,
+      x=list(corr_matrix.columns),
+      y=list(corr_matrix.index),
+      colorscale="RdBu_r",
+      annotation_text=corr_matrix.round(2).values,
+      showscale=True
+  )
+
+  # Ajustement de la disposition
+  fig.update_layout(
+      title="Matrice de corrélation des variables numériques",
+      height=600, width=800,
+      xaxis=dict(side="bottom", tickangle=-45),
+      yaxis=dict(side="left")
+  )
+
+  # Affichage
+  fig.show()
+
+def calculer_correlation(df, col1, col2):
+  """
+  Calcule et affiche la corrélation entre deux colonnes d'un DataFrame.
+
+  Paramètres :
+  df :DataFrame contenant les données.
+  col1 : nom de la première colonne.
+  col2 : nom de la deuxième colonne.
+
+  Retourne la valeur de la corrélation et une interprétation de son intensité.
+  """
+  correlation = df[col1].corr(df[col2])
+  print(f"Corrélation entre {col1} et {col2} : {correlation:.2f}")
+
+  if abs(correlation) > 0.8:
+      interpretation = "Très forte corrélation"
+  elif abs(correlation) > 0.6:
+      interpretation = "Forte corrélation"
+  elif abs(correlation) > 0.4:
+      interpretation = "Corrélation modérée"
+  elif abs(correlation) > 0.15:
+      interpretation = "Corrélation faible"
+  else:
+      interpretation = "Pas de corrélation linéaire significative"
+
+  print(interpretation + ".\n")
+
+  return correlation, interpretation
+
+def detecter_outliers_plotly(df, seuil=1.5):
+  """
+  Détecte les outliers pour chaque variable numérique d'un DataFrame en utilisant la méthode IQR.
+  Affiche également un Boxplot interactif pour chaque variable.
+
+  :param df: DataFrame contenant les données.
+  :param seuil: Seuil du coefficient IQR (par défaut 1.5).
+  :return: DataFrame contenant le nombre d'outliers et le pourcentage par variable.
+  """
+  outliers_dict = {}
+
+  for col in df.select_dtypes(include=['number']).columns:  # Sélectionner les colonnes numériques
+      Q1 = df[col].quantile(0.25)  # Premier quartile
+      Q3 = df[col].quantile(0.75)  # Troisième quartile
+      IQR = Q3 - Q1  # Calcul de l'intervalle interquartile
+
+      # Détection des valeurs aberrantes
+      lower_bound = Q1 - seuil * IQR
+      upper_bound = Q3 + seuil * IQR
+      outliers = df[(df[col] < lower_bound) | (df[col] > upper_bound)]
+
+      # Stocker les résultats
+      nb_outliers = outliers.shape[0]
+      perc_outliers = (nb_outliers / df.shape[0]) * 100
+      outliers_dict[col] = {"Nb_Outliers": nb_outliers, "Pourcentage": round(perc_outliers, 2)}
+
+      # Création du Boxplot avec Plotly
+      fig = go.Figure()
+      fig.add_trace(go.Box(
+          x=df[col],
+          name=col,
+          marker_color='blue',
+          boxpoints='outliers'
+      ))
+
+      # Mise en page
+      fig.update_layout(
+          title=f"Box Plot de {col}",
+          xaxis_title="Valeur",
+          yaxis_title="Variable",
+          template="plotly_white",
+          showlegend=False
+      )
+
+      fig.show()
+
+  # Conversion en DataFrame
+  df_outliers = pd.DataFrame.from_dict(outliers_dict, orient='index')
+
+  return df_outliers
+
+def analyse_columns(df):
+  """
+  Analyse les colonnes d'un DataFrame : nom, type, nombre de valeurs uniques et exemples de valeurs.
+
+  :param df: DataFrame Pandas
+  :return: DataFrame avec l'analyse des colonnes
+  """
+  analysis = []
+
+  for col in df.columns:
+      col_name = col
+      col_type = df[col].dtype
+      unique_count = df[col].nunique()  # Nombre de valeurs uniques
+      unique_values = df[col].dropna().unique()[:5].tolist()  # Exemples (max 5)
+      unique_values = " | ".join(map(str, unique_values))  # Séparateur : " | "
+
+      analysis.append({
+          'Nom de la colonne': col_name,
+          'Type de la colonne': col_type,
+          'Nombre de valeurs uniques': unique_count,
+          'Exemples de valeurs': unique_values
+      })
+
+  return pd.DataFrame(analysis)
+
+def plot_scatter_co2(df, x, y="CO2", color="Carburant", size="CO2"):
+  """
+  Génère un scatter plot interactif avec Plotly, avec une ligne de moyenne CO2.
+
+  Paramètres :
+  - df : DataFrame contenant les données
+  - x : Nom de la colonne pour l'axe X
+  - y : Nom de la colonne pour l'axe Y (par défaut "CO2")
+  - color : Nom de la colonne pour la couleur des points (par défaut "Carburant")
+  - size : Nom de la colonne pour la taille des points (par défaut "CO2")
+  """
+
+  # Calcul de la moyenne globale du CO2
+  moyenne_co2 = df[y].mean()
+
+  # Création du scatter plot
+  fig = px.scatter(
+      df,
+      x=x,
+      y=y,
+      color=color,
+      size=size,
+      title=f"Relation entre {x} et {y}",
+      labels={x: x.capitalize(), y: y.capitalize(), color: color.capitalize()},
+      hover_data=df.columns,
+      size_max=20
+  )
+
+  # Ajout de la ligne de moyenne CO2
+  fig.add_hline(
+      y=moyenne_co2,
+      line_dash="dot",
+      line_color="red",
+      annotation_text=f"Moyenne CO2: {moyenne_co2:.2f} g/km",
+      annotation_position="top right",
+      annotation_font_color="red",
+      annotation_font_size=12,
+      annotation_bgcolor="rgba(255,255,255,0.7)"
+  )
+
+  fig.show()
+
+
+def analyser_hist_co2_par_variable(df, variable, top_n=50, order='desc', co2="CO2"):
+  """
+  Génère un histogramme interactif avec Plotly, avec une ligne de moyenne CO2.
+
+  Paramètres :
+  :param df : DataFrame contenant les données
+  :param variable : Nom de la colonne à analyser
+  :param top_n: Nombre de catégories à afficher (par défaut 50).
+  :param order: Ordonnancement des catégories (par défaut 'desc').
+  :param co2: Nom de la colonne des émissions de CO2 (par défaut "CO2")
+  """
+  ascending = True if order == 'asc' else False
+
+  df_co2 = df.groupby(variable)[co2].mean().sort_values(ascending=ascending).reset_index()
+  df_co2 = df_co2.head(top_n)
+
+  df_co2['CO2_txt'] = df_co2[co2].apply(lambda x: f"{x:.2f}")
+
+  moyenne_co2 = df[co2].mean()
+
+  fig = px.bar(
+      df_co2,
+      x=variable,
+      y=co2,
+      title=f"Distribution des émissions de CO2 par {variable} (Top {top_n})",
+      labels={variable: variable.capitalize(), co2: "Émissions de CO2 (g/km)"},
+      color=co2,
+      color_continuous_scale="RdYlGn_r",
+      text='CO2_txt'
+  )
+
+  # Ligne de moyenne du CO2
+  fig.add_hline(
+      y=moyenne_co2,
+      line_dash="dot",
+      line_color="red",
+      annotation_text=f"Moyenne CO2: {moyenne_co2:.2f} g/km",
+      annotation_position="top right",
+      annotation_font_color="red",
+      annotation_font_size=12,
+      annotation_bgcolor="rgba(255,255,255,0.7)"
+  )
+
+  fig.update_layout(
+      xaxis_tickangle=-75,
+      coloraxis_colorbar=dict(title="CO2 (g/km)"),
+      uniformtext_minsize=8,
+      uniformtext_mode='hide'
+  )
+
+  fig.show()
+
+def detecter_outliers_plotly_var(serie, seuil=1.5):
+    """
+    Détecte les outliers pour une seule variable numérique en utilisant la méthode IQR.
+    Affiche également un Boxplot interactif.
+
+    :param serie: Série Pandas contenant les valeurs de la variable.
+    :param seuil: Seuil du coefficient IQR (par défaut 1.5).
+    :return: DataFrame contenant le nombre d'outliers et le pourcentage.
+    """
+    if not isinstance(serie, pd.Series):
+        raise ValueError("Veuillez fournir une variable sous forme de pd.Series")
+
+    Q1 = serie.quantile(0.25)  # Premier quartile
+    Q3 = serie.quantile(0.75)  # Troisième quartile
+    IQR = Q3 - Q1  # Intervalle interquartile
+
+    # Détection des valeurs aberrantes
+    lower_bound = Q1 - seuil * IQR
+    upper_bound = Q3 + seuil * IQR
+    outliers = serie[(serie < lower_bound) | (serie > upper_bound)]
+
+    # Résultats
+    nb_outliers = outliers.shape[0]
+    perc_outliers = (nb_outliers / serie.shape[0]) * 100
+
+    # Création du Boxplot avec Plotly
+    fig = go.Figure()
+    fig.add_trace(go.Box(
+        x=serie,
+        name=serie.name if serie.name else "Variable",
+        marker_color='blue',
+        boxpoints='outliers'
+    ))
+
+    # Mise en page
+    fig.update_layout(
+        title=f"Box Plot de {serie.name if serie.name else 'Variable'}",
+        xaxis_title="Valeur",
+        yaxis_title="Variable",
+        template="plotly_white",
+        showlegend=False
+    )
+
+    fig.show()
+
+    # Résultats sous forme de DataFrame
+    df_outliers = pd.DataFrame({
+        "Nb_Outliers": [nb_outliers],
+        "Pourcentage": [round(perc_outliers, 2)]
+    }, index=[serie.name if serie.name else "Variable"])
+
+    return df_outliers
