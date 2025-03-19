@@ -1,1 +1,10 @@
 datasets/datas_FR_2022_2023.csv
+notebooks/save_fonctions
+notebooks/save_fonctions
+notebooks/.DS_Store
+/notebooks/__pycache__
+.DS_Store
+/.ipynb_checkpoints
+/.ipynb_checkpoints
+/notebooks/.ipynb_checkpoints
+streamlit/datasets/datas_FR_2022_2023.csv
