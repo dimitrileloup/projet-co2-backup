@@ -925,6 +925,14 @@ try:
 
     elif section == "📝 Conclusion":
         st.header("📝 Conclusion")
+        st.subheader("Synthèse des résultats")
+        st.write("Le modèle XX offre la meilleure précision.")
+        st.subheader("Améliorations futures")
+        st.markdown("""
+                    - Ajout de nouvelles variables (aérodynamisme, type de transmission).
+                    - Mise en production du modèle via une API pour prédire les émissions en temps réel.
+                    """)
+
 
 except FileNotFoundError:
     st.error("Fichiers non trouvés. Vérifiez que 'datas_nettoyees_model_FR.csv' est bien dans le même dossier que ce script.")
