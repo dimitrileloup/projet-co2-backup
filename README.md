@@ -14,6 +14,8 @@ Python, Pandas, Plotly, Scikit-learn, Streamlit
 # Organisation des répertoires
 
 # Streamlit
+## Fonctionnement
+Télécharger le dossier **streamlit**
 
 # TODO : 
 requirements,
