@@ -16,7 +16,7 @@ Python, Pandas, Plotly, Scikit-learn, Streamlit
 # Streamlit
 Streamlit permet de créer des applications web interactives.
 ## Installation en local de Streamlit
-`pip install streamlit`
+```pip install streamlit```
 ## Fonctionnement
 Télécharger le dossier **streamlit**.
 
