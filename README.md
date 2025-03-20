@@ -18,8 +18,9 @@ Streamlit permet de créer des applications web interactives.
 ## Installation en local de Streamlit
 `pip install streamlit`
 ## Fonctionnement
-Télécharger le dossier **streamlit**
-Dans un terminal, lancer le fichier Projet_CO2.py avec la commande `streamlit run Projet_CO2.py`
+Télécharger le dossier **streamlit**.
+
+Dans un terminal, lancer le fichier Projet_CO2.py avec la commande `streamlit run Projet_CO2.py`. Cela ouvrira l'application dans un navigateur.
 
 # TODO : 
 requirements,
