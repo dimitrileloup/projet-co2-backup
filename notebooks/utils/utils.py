@@ -1,5 +1,19 @@
 
 
+import pandas as pd
+
+import numpy as np
+
+import matplotlib.pyplot as plt
+
+import seaborn as sns
+
+import plotly.figure_factory as ff
+import plotly.express as px
+import plotly.graph_objects as go
+
+from scipy.stats import gaussian_kde
+
 def analyser_variable_categorielle_plotly(df, variable, top_n=100, display_array=True):
   """
   Analyse une variable catégorielle en affichant un DataFrame des 'top_n' catégories les plus fréquentes, ainsi qu'un graphique.
