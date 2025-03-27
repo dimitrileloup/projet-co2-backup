@@ -1,0 +1,3 @@
+git remote add backup https://github.com/dimitrileloup/projet-co2-backup.git
+git push backup --all
+git push backup --tags
