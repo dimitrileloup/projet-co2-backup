@@ -5,6 +5,5 @@ notebooks/.DS_Store
 /.ipynb_checkpoints
 /notebooks/.ipynb_checkpoints
 streamlit/datasets/datas_FR_2022_2023.csv
-*.ipynb
 *.pyc
 Commandes_backup_.txt
