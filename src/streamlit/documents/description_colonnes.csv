@@ -1,0 +1,41 @@
+index,Nom de la variable,Descriptif,Type
+0,ID,Identifiant,int64
+1,Country,Pays,object
+2,VFN,Numéro d'identification de la famille du véhicule.,object
+3,Mp,Pool des constructeurs,object
+4,Mh,Nom du fabricant Dénomination standard de l'UE.,object
+5,Man,Déclaration OEM du nom du fabricant.,object
+6,MMS,Nom du fabricant Dénomination du registre MS.,float64
+7,Tan,Numéro d'homologation de type.,object
+8,T,Type,object
+9,Va,Variante,object
+10,Ve,Version,object
+11,Mk,Marque,object
+12,Cn,Nom commercial,object
+13,Ct,Catégorie du type de véhicule réceptionné.,object
+14,Cr,Catégorie du véhicule immatriculé.,object
+15,r,Total des nouvelles inscriptions.,int64
+16,m (kg),Masse en ordre de marche Véhicule terminé/complet .,float64
+17,Mt,Masse d’essai WLTP.,float64
+18,Enedc (g/km),Émissions spécifiques de CO2 (NEDC).,float64
+19,Ewltp (g/km),Émissions spécifiques de CO2 (WLTP).,int64
+20,W (mm),Empattement,float64
+21,At1 (mm),Largeur d'essieu essieu directeur.,float64
+22,At2 (mm),Largeur d'essieu autre essieu.,float64
+23,Ft,Type de carburant.,object
+24,Fm,Mode carburant.,object
+25,ec (cm3),Capacité du moteur.,float64
+26,ep (KW),Puissance du moteur.,float64
+27,z (Wh/km),Consommation d'énergie électrique.,float64
+28,IT,Technologie innovante ou groupe de technologies innovantes.,object
+29,Ernedc (g/km),Réduction des émissions grâce à des technologies innovantes.,float64
+30,Erwltp (g/km),Réduction des émissions grâce à des technologies innovantes (WLTP).,float64
+31,De,Facteur de déviation.,float64
+32,Vf,Facteur de vérification.,float64
+33,Status,"P = Données provisoires, F = Données finales.",object
+34,year,Année de déclaration.,int64
+35,Date of registration,Date d'enregistrement,object
+36,Fuel consumption,Consommation de carburant.,float64
+37,ech,Norme Euro,object
+38,RLFI,NaN,object
+39,Electric range (km),Autonomie électrique (km),float64
