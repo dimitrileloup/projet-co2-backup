@@ -169,8 +169,8 @@ csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
 dossier_documents = "documents/"
 
 #     # chemin des fichiers pour le déploiement sur Streamlit
-#     csv_path_dataset_nettoye = "https://www.dropbox.com/scl/fi/81prk7ls26thkdsh6nu51/datas_nettoyees_model_FR.csv?rlkey=j4pnxt65occhb8psinphkqm9l&st=c3azevud&dl=1"
-#     csv_path_dataset_original = "https://www.dropbox.com/scl/fi/1iemtqcmm8j6m72xape0s/datas_FR_2022_2023.csv?rlkey=sfrehoukuvha3khpm5w0erj03&st=ah9p5g2x&dl=1"
+#     csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
+#     csv_path_dataset_original = "https://github.com/dimitrileloup/projet-co2-backup/releases/download/v1.0/datas_FR_2022_2023.csv"
 #     dossier_documents = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/src/streamlit/documents/"
 
 try:
