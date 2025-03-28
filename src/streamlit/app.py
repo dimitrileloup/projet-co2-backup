@@ -161,8 +161,12 @@ csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
 
 # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux
 path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
-
 csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
+
+# sur streamlit, Kaggle 
+dropbox_url = "https://www.dropbox.com/scl/fi/1iemtqcmm8j6m72xape0s/datas_FR_2022_2023.csv?rlkey=sfrehoukuvha3khpm5w0erj03&st=ah9p5g2x&dl=1"
+
+df = pd.read_csv(dropbox_url, nrows=1000)
 
 try:
     df_original = pd.read_csv(csv_path_dataset_original, nrows=1000)
@@ -172,6 +176,9 @@ try:
     df_nettoye.columns = df_nettoye.columns.str.strip()
     
     if section == "🏠 Introduction et objectif":
+        
+        st.dataframe(df.head(10))
+
         st.header("🏠 Introduction et objectif")
         st.write("Identifier les véhicules qui émettent le plus de CO2 est important pour identifier les caractéristiques techniques qui jouent un rôle dans la pollution. "
         "Prédire à l’avance cette pollution permet de prévenir dans le cas de l’apparition de nouveaux types de véhicules (nouvelles séries de voitures par exemple).")
