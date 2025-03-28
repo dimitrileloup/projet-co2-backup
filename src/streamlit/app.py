@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import joblib
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import kagglehub
+import socket
 
 st.set_page_config(layout="wide")
 
@@ -155,18 +156,22 @@ st.sidebar.markdown("""
 st.sidebar.markdown("---")
 st.sidebar.markdown("#### 🎓 Promotion Continue Data Scientest Novembre 2024")
 
-# Chemins des fichiers locaux
-#csv_path_dataset_original = "datasets/datas_FR_2022_2023.csv"
+
+# Détection environnement local
+hostname = socket.gethostname()
+is_local = "localhost" in hostname.lower()
+
+# Chemins des fichiers en local
 csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
-
-csv_path_dataset_nettoye = "https://www.dropbox.com/scl/fi/81prk7ls26thkdsh6nu51/datas_nettoyees_model_FR.csv?rlkey=j4pnxt65occhb8psinphkqm9l&st=c3azevud&dl=1"
 # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux
-# path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
-# csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
+path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
+csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
+dossier_documents = "documents/"
 
-csv_path_dataset_original = "https://www.dropbox.com/scl/fi/1iemtqcmm8j6m72xape0s/datas_FR_2022_2023.csv?rlkey=sfrehoukuvha3khpm5w0erj03&st=ah9p5g2x&dl=1"
-
-# df = pd.read_csv(dropbox_url, nrows=1000)
+#     # chemin des fichiers pour le déploiement sur Streamlit
+#     csv_path_dataset_nettoye = "https://www.dropbox.com/scl/fi/81prk7ls26thkdsh6nu51/datas_nettoyees_model_FR.csv?rlkey=j4pnxt65occhb8psinphkqm9l&st=c3azevud&dl=1"
+#     csv_path_dataset_original = "https://www.dropbox.com/scl/fi/1iemtqcmm8j6m72xape0s/datas_FR_2022_2023.csv?rlkey=sfrehoukuvha3khpm5w0erj03&st=ah9p5g2x&dl=1"
+#     dossier_documents = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/src/streamlit/documents/"
 
 try:
     df_original = pd.read_csv(csv_path_dataset_original, nrows=1000)
@@ -216,7 +221,7 @@ try:
         var.head(40)"""
         st.code(code_snippet, language="python")
         
-        df_analyse = pd.read_csv("documents/description_colonnes.csv")
+        df_analyse = pd.read_csv(f"{dossier_documents}description_colonnes.csv")
         df_analyse
     
     elif section == "🔍 Exploration des données":
@@ -245,21 +250,21 @@ try:
 
                         return pd.DataFrame(analysis)
                         """, language="python")
-        df_analyse = load_and_format_csv("documents/analyse_rapide_colonnes.csv")
+        df_analyse = load_and_format_csv(f"{dossier_documents}analyse_rapide_colonnes.csv")
         #df_analyse = pd.read_csv("documents/analyse_rapide_colonnes.csv")
         df_analyse     
 
         st.subheader("Description rapide des variables numériques")
         code_snippet = """df.describe(include='number').T"""
         st.code(code_snippet, language="python")
-        df_analyse = load_and_format_csv("documents/describe_numerical.csv")
+        df_analyse = load_and_format_csv(f"{dossier_documents}describe_numerical.csv")
         #df_analyse = pd.read_csv("documents/describe_numerical.csv")
         df_analyse
 
         st.subheader("Description rapide des variables catégorielles")
         code_snippet = """df.describe(include='object').T"""
         st.code(code_snippet, language="python")
-        df_analyse = load_and_format_csv("documents/describe_object.csv")
+        df_analyse = load_and_format_csv(f"{dossier_documents}describe_object.csv")
         #df_analyse = pd.read_csv("documents/describe_object.csv")
         df_analyse        
     
@@ -286,7 +291,7 @@ try:
 
                             return missing_values_df
                             """, language="python")
-            df_analyse = load_and_format_csv("documents/analyse_valeurs_manquantes.csv")
+            df_analyse = load_and_format_csv(f"{dossier_documents}analyse_valeurs_manquantes.csv")
             #df_analyse = pd.read_csv("documents/analyse_valeurs_manquantes.csv")
             df_analyse
         
@@ -401,7 +406,7 @@ try:
 
         with st.expander("🛠️ *Traitement des valeurs manquantes*"):       
             st.markdown("##### Valeurs manquantes")
-            df_vm = pd.read_csv("documents/valeurs_manquantes.csv")
+            df_vm = pd.read_csv(f"{dossier_documents}valeurs_manquantes.csv")
             df_vm
             
             st.markdown("##### Gestion des valeurs manquantes de la colonne Consommation carburant")
@@ -410,7 +415,7 @@ try:
                             df_fc_na"""
             st.code(code_snippet, language="python")
             #df_vm = pd.read_csv("documents/valeurs_manquantes2.csv")
-            df_vm = load_and_format_csv("documents/valeurs_manquantes2.csv")
+            df_vm = load_and_format_csv(f"{dossier_documents}valeurs_manquantes2.csv")
             df_vm
 
             code_snippet = """
@@ -420,7 +425,7 @@ try:
                         """
             st.code(code_snippet, language="python")
             #df_vm = pd.read_csv("documents/valeurs_manquantes3.csv")
-            df_vm = load_and_format_csv("documents/valeurs_manquantes3.csv")
+            df_vm = load_and_format_csv(f"{dossier_documents}valeurs_manquantes3.csv")
             df_vm
 
             code_snippet = """
@@ -435,7 +440,7 @@ try:
             st.code(code_snippet, language="python")
 
             st.markdown("##### Gestion des valeurs manquantes de la colonne Masse à vide")
-            df_vm = pd.read_csv("documents/valeurs_manquantes4.csv")
+            df_vm = pd.read_csv(f"{dossier_documents}valeurs_manquantes4.csv")
             df_vm
 
             code_snippet = """
@@ -443,7 +448,7 @@ try:
                             df_mkg_na"""
             st.code(code_snippet, language="python")
             #df_vm = pd.read_csv("documents/valeurs_manquantes5.csv")
-            df_vm = load_and_format_csv("documents/valeurs_manquantes5.csv")
+            df_vm = load_and_format_csv(f"{dossier_documents}valeurs_manquantes5.csv")
             df_vm
 
             st.write("Recherchons dans le dataset si nous avons des modèles équivalents dont les variables m (kg) et Mt ne sont **pas nulles**")
@@ -452,7 +457,7 @@ try:
                         df_jag_lr
                         """
             st.code(code_snippet, language="python")
-            df_vm = load_and_format_csv("documents/valeurs_manquantes6.csv")
+            df_vm = load_and_format_csv(f"{dossier_documents}valeurs_manquantes6.csv")
             #df_vm = pd.read_csv("documents/valeurs_manquantes6.csv")
             df_vm
 
@@ -472,7 +477,7 @@ try:
                         df.loc[23942].to_frame().T
                         """
             st.code(code_snippet, language="python")
-            df_vm = load_and_format_csv("documents/valeurs_manquantes7.csv")
+            df_vm = load_and_format_csv(f"{dossier_documents}valeurs_manquantes7.csv")
             #df_vm = pd.read_csv("documents/valeurs_manquantes7.csv")
             df_vm
         
