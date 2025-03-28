@@ -8,27 +8,31 @@ import matplotlib.pyplot as plt
 import joblib
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import kagglehub
-import socket
+import os
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 st.set_page_config(layout="wide")
 
 def load_and_format_csv(file_path):
     # Charger le CSV
     df = pd.read_csv(file_path)
-    
-    # Application d'un formatage : Arrondi uniquement les nombres à virgule
+
+    # Fonction de formatage
     def format_value(x):
-        if isinstance(x, float):  # Seulement les floats, pas les entiers
+        if isinstance(x, float):  # Float : 5 décimales
             return f"{x:,.5f}".replace(",", "")
-        elif isinstance(x, int):  # Si c'est un entier, ne pas modifier
+        elif isinstance(x, int):  # Int : formaté avec des espaces
             return f"{x:,}".replace(",", "")
         else:
-            return x  # Garde les autres valeurs inchangées
+            return x
 
-    # Appliquer la fonction à tout le DataFrame
-    df = df.applymap(format_value)
+    # Appliquer le formatage colonne par colonne
+    for col in df.select_dtypes(include=["float", "int"]):
+        df[col] = df[col].map(format_value)
 
     return df
+
 
 def detecter_outliers_plotly_var(serie, seuil=1.5):
     """
@@ -157,21 +161,34 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("#### 🎓 Promotion Continue Data Scientest Novembre 2024")
 
 
-# Détection environnement local
-hostname = socket.gethostname()
-is_local = "localhost" in hostname.lower()
+from streamlit_javascript import st_javascript
 
-# Chemins des fichiers en local
-csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
-# Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux
-path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
-csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
-dossier_documents = "documents/"
+# Récupérer l'URL du navigateur
+url = st_javascript("window.location.href")
 
-#     # chemin des fichiers pour le déploiement sur Streamlit
-#     csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
-#     csv_path_dataset_original = "https://github.com/dimitrileloup/projet-co2-backup/releases/download/v1.0/datas_FR_2022_2023.csv"
-#     dossier_documents = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/src/streamlit/documents/"
+if url:
+    if "localhost" in url or "127.0.0.1" in url:
+        ENV = "local"
+    else:
+        ENV = "cloud"
+    
+    st.success(f"🌍 Environnement détecté : {ENV}")
+    st.write(f"URL : {url}")
+else:
+    st.warning("⏳ En attente du navigateur...")
+
+if ENV == "local":
+    # Chemins des fichiers en local
+    csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
+    # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux
+    path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
+    csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
+    dossier_documents = "documents/"
+else:
+    # chemin des fichiers pour le déploiement sur Streamlit
+    csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
+    csv_path_dataset_original = "https://github.com/dimitrileloup/projet-co2-backup/releases/download/v1.0/datas_FR_2022_2023.csv"
+    dossier_documents = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/src/streamlit/documents/"
 
 try:
     df_original = pd.read_csv(csv_path_dataset_original, nrows=1000)
@@ -210,10 +227,10 @@ try:
                         df = pd.read_csv("datas_FR_2022_2023.csv")
                         df.head(10)"""
         st.code(code_snippet, language="python")   
-        df_original = df_original.applymap(lambda x: f"{x:,}".replace(",", " ") if isinstance(x, (int, float)) else x)
+        for col in df_original.select_dtypes(include=["int", "float"]):
+            df_original[col] = df_original[col].map(lambda x: f"{x:,}".replace(",", " "))
 
-        st.dataframe(df_original.head(10))
-        
+        st.dataframe(df_original.head(10))        
 
         st.subheader("Signification des colonnes")
         code_snippet = """
