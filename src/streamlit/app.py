@@ -40,7 +40,9 @@ if environnement == "local":
     dossier_documents = "documents/"
 else:
     # chemin des fichiers pour le déploiement sur Streamlit
-    csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
+    #csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
+    #csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datas_FR_2022_2023.csv"
+    csv_path_dataset_nettoye = "https://huggingface.co/datasets/dleloup/datas_nettoyees_model_FR/resolve/main/datas_nettoyees_model_FR.csv"
     csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datas_FR_2022_2023.csv"
     dossier_documents = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/src/streamlit/documents/"
 
