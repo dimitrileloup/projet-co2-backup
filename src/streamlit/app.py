@@ -165,19 +165,19 @@ from streamlit_javascript import st_javascript
 
 # Récupérer l'URL du navigateur
 url = st_javascript("window.location.href")
-
+environnement = ''
 if url:
     if "localhost" in url or "127.0.0.1" in url:
-        ENV = "local"
+        environnement = "local"
     else:
-        ENV = "cloud"
+        environnement = "cloud"
     
-    st.success(f"🌍 Environnement détecté : {ENV}")
+    st.success(f"🌍 Environnement détecté : {environnement}")
     st.write(f"URL : {url}")
 else:
     st.warning("⏳ En attente du navigateur...")
 
-if ENV == "local":
+if environnement == "local":
     # Chemins des fichiers en local
     csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
     # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux
