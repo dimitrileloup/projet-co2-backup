@@ -34,7 +34,7 @@ else:
 if environnement == "local":
     # Chemins des fichiers en local
     csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
-    # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux
+    # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
     path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
     csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
     dossier_documents = "documents/"
