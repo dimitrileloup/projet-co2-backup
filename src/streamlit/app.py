@@ -26,8 +26,8 @@ if url:
     else:
         environnement = "cloud"
     
-    st.success(f"Environnement détecté : {environnement}")
-    st.write(f"URL : {url}")
+    # st.success(f"Environnement détecté : {environnement}")
+    # st.write(f"URL : {url}")
 else:
     st.warning("En attente du navigateur...")
 
