@@ -159,6 +159,7 @@ st.sidebar.markdown("#### 🎓 Promotion Continue Data Scientest Novembre 2024")
 #csv_path_dataset_original = "datasets/datas_FR_2022_2023.csv"
 csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
 
+csv_path_dataset_nettoye = "https://www.dropbox.com/scl/fi/81prk7ls26thkdsh6nu51/datas_nettoyees_model_FR.csv?rlkey=j4pnxt65occhb8psinphkqm9l&st=c3azevud&dl=1"
 # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux
 # path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
 # csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
