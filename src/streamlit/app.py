@@ -44,7 +44,7 @@ else:
     #csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datas_FR_2022_2023.csv"
     csv_path_dataset_nettoye = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_nettoyees_model_FR.csv"
     csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_FR_2022_2023.csv"
-    dossier_documents = "https://huggingface.co/datasets/dleloup/vehicules-co2/tree/main/documents/"
+    dossier_documents = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/documents/"
 
 
 def load_and_format_csv(file_path):
