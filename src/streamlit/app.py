@@ -17,7 +17,7 @@ st.set_page_config(layout="wide")
 
 from streamlit_javascript import st_javascript
 
-# On récupère l'URL du navigateur
+# On récupère l'URL du navigateur 
 url = st_javascript("window.location.href")
 environnement = ''
 if url:
