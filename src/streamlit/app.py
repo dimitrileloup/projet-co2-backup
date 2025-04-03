@@ -960,6 +960,7 @@ try:
         st.markdown("""
                     - Ajout de nouvelles variables (aérodynamisme, type de transmission).
                     - Mise en production du modèle via une API pour prédire les émissions en temps réel.
+                    - Tracking des tests dans MLFlow
                     """)
 
 
