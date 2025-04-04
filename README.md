@@ -7,6 +7,10 @@ Ce projet s'inscrit dans notre cursus Data Scientest - Novembre 2024.
 Données : https://www.kaggle.com/datasets/dimitrileloup/vehicules-fr-2022-2023
 
 # Membres
+Younès ABIDAT
+Victor BRUNET
+Christian GIBOUDEAU
+Dimitri LELOUP
 
 # Technologies
 Python, Pandas, Plotly, Scikit-learn, Streamlit
