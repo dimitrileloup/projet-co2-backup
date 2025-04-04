@@ -11,3 +11,5 @@ notebooks/backup_fonctions
 
 # Ignore les mlruns
 notebooks/dimitri/mlruns/
+
+notebooks/dimitri/2_Modelisation_2022_2023_FR.ipynb
