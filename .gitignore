@@ -8,3 +8,6 @@ streamlit/datasets/datas_FR_2022_2023.csv
 *.pyc
 Commandes_backup_.txt
 notebooks/backup_fonctions
+
+# Ignore les mlruns
+notebooks/dimitri/mlruns/
