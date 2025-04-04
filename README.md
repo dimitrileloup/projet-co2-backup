@@ -12,6 +12,8 @@ Victor BRUNET
 Christian GIBOUDEAU
 Dimitri LELOUP
 
+Mentor : Antoine
+
 # Technologies
 Python, Pandas, Plotly, Scikit-learn, Streamlit
 
