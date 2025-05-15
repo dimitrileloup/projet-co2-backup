@@ -1,0 +1,8 @@
+# 1 Créer dockerfile
+
+# 2 Construire l’image Docker 
+docker build -t streamlit-co2-app .
+
+# 3 Créer un conteneur à partir de l'image
+docker run -p 8501:8501 --name container-co2 streamlit-co2-app
+

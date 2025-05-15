@@ -1,0 +1,14 @@
+notebooks/save_fonctions
+notebooks/.DS_Store
+/notebooks/__pycache__
+.DS_Store
+/.ipynb_checkpoints
+/notebooks/.ipynb_checkpoints
+streamlit/datasets/datas_FR_2022_2023.csv
+*.pyc
+Commandes_backup_.txt
+notebooks/backup_fonctions
+
+# Ignore les mlruns
+notebooks/dimitri/mlruns/
+/notebooks/images_rapport
