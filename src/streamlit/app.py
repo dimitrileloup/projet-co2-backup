@@ -19,39 +19,39 @@ st.set_page_config(layout="wide")
 from streamlit_javascript import st_javascript
 
 # On récupère l'URL du navigateur
-# url = st_javascript("window.location.href")
-# environnement = ''
-# if url:
-#     if "localhost" in url or "127.0.0.1" in url:
-#         environnement = "local"
-#     else:
-#         environnement = "cloud"
+url = st_javascript("window.location.href")
+environnement = ''
+if url:
+    if "localhost" in url or "127.0.0.1" in url:
+        environnement = "local"
+    else:
+        environnement = "cloud"
 
-#     # st.success(f"Environnement détecté : {environnement}")
-#     # st.write(f"URL : {url}")
-# else:
-#     st.warning("En attente du navigateur...")
+    st.success(f"Environnement détecté : {environnement}")
+    # st.write(f"URL : {url}")
+else:
+    st.warning("En attente du navigateur...")
 
-# if environnement == "local":
-#     # Chemins des fichiers en local
-#     csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
-#     # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
-#     path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
-#     csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
-#     dossier_documents = "documents/"
-# else:
-#     # chemin des fichiers pour le déploiement sur Streamlit
-#     #csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
-#     #csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datas_FR_2022_2023.csv"
-#     csv_path_dataset_nettoye = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_nettoyees_model_FR.csv"
-#     csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_FR_2022_2023.csv"
-#     dossier_documents = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/documents/"
+if environnement == "local":
+    # Chemins des fichiers en local
+    csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
+    # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
+    path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
+    csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
+    dossier_documents = "documents/"
+else:
+    # chemin des fichiers pour le déploiement sur Streamlit
+    #csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
+    #csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datas_FR_2022_2023.csv"
+    csv_path_dataset_nettoye = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_nettoyees_model_FR.csv"
+    csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_FR_2022_2023.csv"
+    dossier_documents = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/documents/"
 
-csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
-# Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
-path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
-csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
-dossier_documents = "documents/"
+# csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
+# # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
+# path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
+# csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
+# dossier_documents = "documents/"
 
 
 def load_and_format_csv(file_path):
