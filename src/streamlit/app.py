@@ -179,16 +179,16 @@ st.sidebar.title("Menu")
 section = st.sidebar.radio(
     " ➡️ Aller à :",
     [
-        "🏠 Introduction et objectif",
-        "📂 Choix, chargement et aperçu du dataset orginal",
-        "🔍 Exploration des données",
-        "⚙️ Pré-processing",
-        "📊 Analyse des variables",
-        "🌿 Analyse de la variable cible CO2",
-        "🚨 Analyse des outliers",
-        "🤖 Modélisation",
-        "🚀 Démo",
-        "📝 Conclusion"
+        "Introduction et objectif",
+        "Choix, chargement et aperçu du dataset orginal",
+        "Exploration des données",
+        "Pré-processing",
+        "Analyse des variables",
+        "Analyse de la variable cible CO2",
+        "Analyse des outliers",
+        "Modélisation",
+        "Démo",
+        "Conclusion"
     ]
 )
 st.sidebar.markdown("---")
@@ -212,13 +212,13 @@ try:
     df_nettoye = pd.read_csv(csv_path_dataset_nettoye)
     df_nettoye.columns = df_nettoye.columns.str.strip()
 
-    if section == "🏠 Introduction et objectif":
-        st.header("🏠 Introduction et objectif")
+    if section == "Introduction et objectif":
+        st.header("Introduction et objectif")
         st.write("Identifier les véhicules qui émettent le plus de CO2 est important pour identifier les caractéristiques techniques qui jouent un rôle dans la pollution. "
         "Prédire à l’avance cette pollution permet de prévenir dans le cas de l’apparition de nouveaux types de véhicules (nouvelles séries de voitures par exemple).")
 
-    elif section == "📂 Choix, chargement et aperçu du dataset orginal":
-        st.header("📂 Choix, chargement et aperçu du dataset orginal")
+    elif section == "Choix, chargement et aperçu du dataset orginal":
+        st.header("Choix, chargement et aperçu du dataset orginal")
 
         st.subheader("Choix du jeu de données")
         st.write("Nous avons étudié et recherché plusieurs jeux de données pour notre projet.")
@@ -256,8 +256,8 @@ try:
         df_analyse = pd.read_csv(f"{dossier_documents}description_colonnes.csv")
         df_analyse
 
-    elif section == "🔍 Exploration des données":
-        st.header("🔍 Exploration des données")
+    elif section == "Exploration des données":
+        st.header("Exploration des données")
         st.subheader("Analyse rapide des colonnes")
         show_code = st.toggle("Afficher le code de la fonction utilisée")
 
@@ -300,8 +300,8 @@ try:
         #df_analyse = pd.read_csv("documents/describe_object.csv")
         df_analyse
 
-    elif section == "⚙️ Pré-processing":
-        st.header("⚙️ Pré-processing")
+    elif section == "Pré-processing":
+        st.header("Pré-processing")
         with st.expander("🔍 *Analyse des valeurs manquantes*"):
             show_code = st.toggle("Afficher le code de la fonction créée")
 
@@ -579,8 +579,8 @@ try:
 
             st.code("""df['IDEC'] = df['Cylindrée moteur'] / df['Masse à vide']""", language="python")
 
-    elif section == "📊 Analyse des variables":
-        st.header("📊 Analyse des variables")
+    elif section == "Analyse des variables":
+        st.header("Analyse des variables")
 
         st.subheader("Analyse des variables catégorielles")
         categorical_columns = df_nettoye.select_dtypes(include='object').columns.tolist()
@@ -642,8 +642,8 @@ try:
         # Affichage du graphique
         st.plotly_chart(fig)
 
-    elif section == "📈 Analyse des variables numériques":
-        st.header("📈 Analyse des variables numériques")
+    elif section == "Analyse des variables numériques":
+        st.header("Analyse des variables numériques")
         numerical_columns = df_nettoye.select_dtypes(include='number').columns.tolist()
         show_code = st.toggle("Afficher la description rapide")
         if show_code:
@@ -673,8 +673,8 @@ try:
         # Affichage du graphique
         st.plotly_chart(fig)
 
-    elif section == "🌿 Analyse de la variable cible CO2":
-        st.header("🌿 Analyse de la variable cible CO2")
+    elif section == "Analyse de la variable cible CO2":
+        st.header("Analyse de la variable cible CO2")
         st.subheader("Analyse du CO2 en fonction des autres variables")
         target_variable = "CO2"
         if target_variable in df_nettoye.columns:
@@ -772,8 +772,8 @@ try:
                                 height=700)
         st.plotly_chart(fig_corr)
 
-    elif section == "🚨 Analyse des outliers":
-        st.header("🚨 Analyse des outliers")
+    elif section == "Analyse des outliers":
+        st.header("Analyse des outliers")
 
         # Sélection de la variable à analyser
         selected_variable = st.selectbox("Sélectionnez une variable :", df_nettoye.select_dtypes(include='number').columns)
@@ -788,9 +788,9 @@ try:
             # Affichage du boxplot
             st.plotly_chart(fig_outliers)
 
-    elif section == "🤖 Modélisation":
+    elif section == "Modélisation":
 
-        st.header("🤖 Modélisation des émissions de CO2")
+        st.header("Modélisation des émissions de CO2")
 
         import os
         model_display_names = {
@@ -970,8 +970,8 @@ try:
             st.error(f"Erreur lors de la comparaison des modèles : {str(e)}")
 
 
-    elif section == "🚀 Démo":
-        st.header("🚀 Démo : prédiction des Émissions de CO2")
+    elif section == "Démo":
+        st.header("Démo : prédiction des Émissions de CO2")
 
         # Sélection du modèle
         model_choice = st.selectbox(
@@ -1097,8 +1097,8 @@ try:
 
             #st.info("ℹ️ Comment sont classés les véhicules ?  \n <span class="co2-badge a">A</span> n Classe E :  \n Classe F :   \n Classe G : > 250 g/km")
 
-    elif section == "📝 Conclusion":
-        st.header("📝 Conclusion")
+    elif section == "Conclusion":
+        st.header("Conclusion")
         st.subheader("Synthèse des résultats")
         st.write("Les modèles XGBoostRegressor, GradientBoosting et RandomForest offrent les meilleures précisions.")
         st.subheader("Améliorations futures")
