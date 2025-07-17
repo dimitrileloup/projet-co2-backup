@@ -880,11 +880,19 @@ try:
         )
 
         # Dictionnaire pour faire correspondre le choix à ton fichier .pkl
-        model_paths = {
-            "XGBoost": "models/XGBoostRegressor_model.pkl",
-            "GradientBoosting": "models/GradientBoostingRegressor_model.pkl",
-            "RandomForest": "models/RandomForestRegressor_model.pkl"
-        }
+        if environnement == "local":
+            model_paths = {
+                "XGBoost": "models/XGBoostRegressor_model.pkl",
+                "GradientBoosting": "models/GradientBoostingRegressor_model.pkl",
+                "RandomForest": "models/RandomForestRegressor_model.pkl"
+            }
+        else:  # cloud
+            model_paths = {
+                "XGBoost": "src/streamlit/models/XGBoostRegressor_model.pkl",
+                "GradientBoosting": "src/streamlit/models/GradientBoostingRegressor_model.pkl",
+                "RandomForest": "src/streamlit/models/RandomForestRegressor_model.pkl"
+            }
+        
 
         # Chargement du modèle
         model_path = model_paths[model_choice]
