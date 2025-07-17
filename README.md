@@ -23,14 +23,77 @@ Python, Pandas, Plotly, Scikit-learn, Streamlit
 Streamlit permet de créer des applications web interactives.
 ## Installation en local de Streamlit
 ```pip install streamlit```
-## Fonctionnement
-Télécharger le dossier **streamlit**.
+## Création et activation d'un environnement "co2_env"
+Lancer Anaconda Prompt
 
-Dans un terminal, lancer le fichier Projet_CO2.py avec la commande `streamlit run app.py`. Cela ouvrira l'application dans un navigateur.
+Créer, si nécessaire l’environnement co2
 
-# TODO : 
-requirements,
+```conda create -n co2_env python=3.10```
 
-pip freeze > requirements.txt
+Activer l’environnement 
 
-lien vers streamlit
+```conda activate co2_env```
+
+Se positionner dans le répertoire streamlit
+
+## Installer les "requirements" 
+scikit-learn
+
+```conda install scikit-learn=1.5.1```
+
+streamlit
+
+```pip install streamlit```
+
+pandas
+
+```pip install pandas```
+
+numpy
+
+```pip install numpy```
+
+joblib
+
+```pip install joblib```
+
+matplotlib
+
+```pip install matplotlib```
+
+xgboost
+
+```pip install xgboost```
+
+plotly
+
+```pip install plotly```
+
+seaborn
+
+```pip install seaborn```
+
+kagglehub
+
+```pip install kagglehub```
+
+streamlit-javascript
+
+```pip install streamlit-javascript```
+
+## Lancer l'application
+
+```streamlit run app.py```
+
+## Tips
+Lister les environnements
+
+```conda env list```
+
+En cas de difficulté à quitter le streamlit
+
+```tasklist | findstr streamlit```
+
+puis 
+
+```taskkill /PID 12345 /F```
