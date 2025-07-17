@@ -45,21 +45,39 @@ streamlit
 
 ```pip install streamlit```
 
+pandas
+
 ```pip install pandas```
+
+numpy
 
 ```pip install numpy```
 
+joblib
+
 ```pip install joblib```
+
+matplotlib
 
 ```pip install matplotlib```
 
+xgboost
+
 ```pip install xgboost```
+
+plotly
 
 ```pip install plotly```
 
+seaborn
+
 ```pip install seaborn```
 
+kagglehub
+
 ```pip install kagglehub```
+
+streamlit-javascript
 
 ```pip install streamlit-javascript```
 
