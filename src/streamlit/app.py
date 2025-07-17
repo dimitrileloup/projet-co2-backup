@@ -798,9 +798,13 @@ try:
         selected_model_file = st.selectbox("Choisissez un modèle enregistré à charger:", model_files)
 
         try:
-            model = joblib.load("models/" + selected_model_file)
-            if environnement == "cloud":
-                model = joblib.load("src/streamlit/models/" + selected_model_file)
+            if environnement == "local":
+                model_path = "models/" + selected_model_file
+            else:  # cloud
+                model_path = "src/streamlit/models/" + selected_model_file
+
+            model = joblib.load(model_path)
+            
             # X_test = df_nettoye.drop(columns=['CO2', 'Marque', 'Modèle', 'Consommation carburant'], axis=1)
             # y_test = df_nettoye['CO2']
             # X_test = pd.read_csv('models/X_test.csv')
@@ -831,9 +835,12 @@ try:
 
             results = []
             for model_file in model_files:
-                model = joblib.load("models/" + model_file)
-                if environnement == "cloud":
-                    model = joblib.load("src/streamlit/models/" + selected_model_file)
+                if environnement == "local":
+                    model_path = "models/" + selected_model_file
+                else:  # cloud
+                    model_path = "src/streamlit/models/" + selected_model_file
+
+                model = joblib.load(model_path)
 
                 y_pred = model.predict(X_test)
 
