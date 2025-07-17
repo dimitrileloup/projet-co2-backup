@@ -37,8 +37,11 @@ Activer l’environnement
 Se positionner dans le répertoire streamlit
 
 ## Installer les "requirements" 
+scikit-learn
 
 ```conda install scikit-learn=1.5.1```
+
+streamlit
 
 ```pip install streamlit```
 
