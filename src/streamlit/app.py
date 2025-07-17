@@ -793,10 +793,26 @@ try:
         st.header("🤖 Modélisation des émissions de CO2")
 
         import os
-        model_files = ["LinearRegression_model.pkl", "Lasso_model.pkl", "Ridge_model.pkl", "SGDRegressor_model.pkl", "RandomForestRegressor_model.pkl", "DecisionTreeRegressor_model.pkl", "GradientBoostingRegressor_model.pkl", "XGBoostRegressor_model.pkl"]  # Exemple de modèles enregistrés
+        model_display_names = {
+            "LinearRegression_model.pkl": "LinearRegression",
+            "Lasso_model.pkl": "Lasso",
+            "Ridge_model.pkl": "Ridge",
+            "SGDRegressor_model.pkl": "SGDRegressor",
+            "RandomForestRegressor_model.pkl": "RandomForestRegressor",
+            "DecisionTreeRegressor_model.pkl": "DecisionTreeRegressor",
+            "GradientBoostingRegressor_model.pkl": "GradientBoostingRegressor",
+            "XGBoostRegressor_model.pkl": "XGBoostRegressor"
+        }
+        # model_files = ["LinearRegression_model.pkl", "Lasso_model.pkl", "Ridge_model.pkl", "SGDRegressor_model.pkl", "RandomForestRegressor_model.pkl", "DecisionTreeRegressor_model.pkl", "GradientBoostingRegressor_model.pkl", "XGBoostRegressor_model.pkl"]  # Exemple de modèles enregistrés
+        # selected_model_file = st.selectbox("Choisissez un modèle enregistré à charger:", model_files)
+        display_to_file = {v: k for k, v in model_display_names.items()}
 
-        selected_model_file = st.selectbox("Choisissez un modèle enregistré à charger:", model_files)
+        selected_display_name = st.selectbox(
+            "Choisissez un modèle enregistré à charger :",
+            list(display_to_file.keys())
+        )
 
+        selected_model_file = display_to_file[selected_display_name]
         try:
             if environnement == "local":
                 model_path = "models/" + selected_model_file
@@ -834,11 +850,11 @@ try:
             # y_test = pd.read_csv('models/y_test.csv').squeeze()
 
             results = []
-            for model_file in model_files:
+            for model_file, display_name  in model_display_names.items():
                 if environnement == "local":
-                    model_path = "models/" + selected_model_file
+                    model_path = "models/" + model_file
                 else:  # cloud
-                    model_path = "src/streamlit/models/" + selected_model_file
+                    model_path = "src/streamlit/models/" + model_file
 
                 model = joblib.load(model_path)
 
@@ -851,7 +867,7 @@ try:
                 ratio_rmse_mae = round(rmse - mae, 2) if mae != 0 else None
 
                 results.append({
-                    "Modèle": model_file,
+                    "Modèle": display_name,
                     "R2": r2,
                     "RMSE": rmse,
                     "MAE": mae
@@ -860,6 +876,90 @@ try:
             df_models = pd.DataFrame(results)
             st.subheader("Comparaison des performances des modèles")
             st.dataframe(df_models)
+
+            # Plot R2
+            # Tri du DataFrame du plus grand R2 au plus petit
+            df_models_sorted = df_models.sort_values(by='R2', ascending=False)
+
+            # Normalisation des couleurs entre 0 et 1 pour R² (utile pour mapper la couleur)
+            df_models_sorted['color_scale'] = (df_models_sorted['R2'] - df_models_sorted['R2'].min()) / (df_models_sorted['R2'].max() - df_models_sorted['R2'].min())
+
+            # Inversion de l'échelle pour avoir rouge (mauvais) -> vert (bon)
+            colors = px.colors.diverging.RdYlGn
+
+            fig = px.bar(
+                df_models_sorted,
+                x='Modèle',
+                y='R2',
+                text='R2',
+                color='color_scale',
+                color_continuous_scale=colors,
+                title='Comparaison des scores R2 test par modèle',
+                labels={'R2': 'R2 Test'}
+            )
+
+            fig.update_layout(
+                xaxis_title="Modèle",
+                yaxis_title="R2 Test",
+                title_x=0,
+                coloraxis_showscale=False
+            )
+            fig.update_traces(marker_line_color='black')
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Plots RMSE
+            df_models_sorted = df_models.sort_values(by="RMSE", ascending=True)
+
+            colorscale = ['green', 'orange', 'red']
+
+            fig = px.bar(
+                df_models_sorted,
+                x="Modèle",
+                y="RMSE",
+                color="RMSE",
+                color_continuous_scale=colorscale,
+                title="Comparaison des RMSE test par modèle",
+                text_auto='.2f'  # 2 décimales
+            )
+
+            fig.update_layout(
+                xaxis_title="Modèle",
+                yaxis_title="RMSE Test",
+                title_x=0,
+                coloraxis_showscale=False
+            )
+
+            fig.update_traces(marker_line_color='black')
+
+            st.plotly_chart(fig)
+
+            # Plots MAE
+            df_models_sorted = df_models.sort_values(by="MAE", ascending=True)
+
+            # Inverser l'ordre du dégradé : vert (meilleur) vers rouge (pire)
+            colorscale = ['green', 'orange', 'red']
+
+            fig = px.bar(
+                df_models_sorted,
+                x="Modèle",
+                y="MAE",
+                color="MAE",
+                color_continuous_scale=colorscale,
+                title="Comparaison des MAE test par modèle",
+                text_auto='.2f'
+            )
+
+            fig.update_layout(
+                xaxis_title="Modèle",
+                yaxis_title="MAE Test",
+                title_x=0,  # Aligné à gauche
+                title_xanchor='left',
+                coloraxis_showscale=False
+            )
+
+            fig.update_traces(marker_line_color='black')
+
+            st.plotly_chart(fig)
 
             st.subheader("Top 4 meilleurs modèles")
             df_sorted = df_models.sort_values(by=["R2", "RMSE"], ascending=[False, True])
@@ -1000,12 +1100,13 @@ try:
     elif section == "📝 Conclusion":
         st.header("📝 Conclusion")
         st.subheader("Synthèse des résultats")
-        st.write("Le modèle XX offre la meilleure précision.")
+        st.write("Les modèles XGBoostRegressor, GradientBoosting et RandomForest offrent les meilleures précisions.")
         st.subheader("Améliorations futures")
         st.markdown("""
                     - Ajout de nouvelles variables (aérodynamisme, type de transmission).
                     - Mise en production du modèle via une API pour prédire les émissions en temps réel.
                     - Tracking des tests dans MLFlow
+                    - Etude d'autres modèles : Voting, MLP ...
                     """)
 
 
