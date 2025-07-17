@@ -27,9 +27,11 @@ Streamlit permet de créer des applications web interactives.
 Lancer Anaconda Prompt
 
 Créer, si nécessaire l’environnement co2
+
 ```conda create -n co2_env python=3.10```
 
 Activer l’environnement 
+
 ```conda activate co2_env```
 
 Se positionner dans le répertoire streamlit
@@ -37,15 +39,25 @@ Se positionner dans le répertoire streamlit
 ## Installer les "requirements" 
 
 ```conda install scikit-learn=1.5.1```
+
 ```pip install streamlit```
+
 ```pip install pandas```
+
 ```pip install numpy```
+
 ```pip install joblib```
+
 ```pip install matplotlib```
+
 ```pip install xgboost```
+
 ```pip install plotly```
+
 ```pip install seaborn```
+
 ```pip install kagglehub```
+
 ```pip install streamlit-javascript```
 
 ## Lancer l'application
@@ -54,6 +66,7 @@ Se positionner dans le répertoire streamlit
 
 ## Tips
 Lister les environnements
+
 ```conda env list```
 
 En cas de difficulté à quitter le streamlit
