@@ -39,6 +39,9 @@ if environnement == "local":
     path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
     csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
     dossier_documents = "documents/"
+    X_test = pd.read_csv('models/X_test.csv')
+    y_test = pd.read_csv('models/y_test.csv').squeeze()
+
 else:
     # chemin des fichiers pour le déploiement sur Streamlit
     #csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
@@ -46,6 +49,8 @@ else:
     csv_path_dataset_nettoye = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_nettoyees_model_FR.csv"
     csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_FR_2022_2023.csv"
     dossier_documents = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/documents/"
+    X_test = pd.read_csv('https://huggingface.co/datasets/dleloup/x_test/resolve/main/X_test.csv')
+    y_test = pd.read_csv('https://huggingface.co/datasets/dleloup/x_test/resolve/main/y_test.csv').squeeze()   
 
 # csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
 # # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
@@ -796,8 +801,8 @@ try:
             model = joblib.load("models/" + selected_model_file)
             # X_test = df_nettoye.drop(columns=['CO2', 'Marque', 'Modèle', 'Consommation carburant'], axis=1)
             # y_test = df_nettoye['CO2']
-            X_test = pd.read_csv('models/X_test.csv')
-            y_test = pd.read_csv('models/y_test.csv').squeeze()
+            # X_test = pd.read_csv('models/X_test.csv')
+            # y_test = pd.read_csv('models/y_test.csv').squeeze()
 
             y_pred = model.predict(X_test)
 
@@ -819,8 +824,8 @@ try:
         try:
             # X_test = df_nettoye.drop(columns=['CO2', 'Marque', 'Modèle', 'Consommation carburant'], axis=1)
             # y_test = df_nettoye['CO2']
-            X_test = pd.read_csv('models/X_test.csv')
-            y_test = pd.read_csv('models/y_test.csv').squeeze()
+            # X_test = pd.read_csv('models/X_test.csv')
+            # y_test = pd.read_csv('models/y_test.csv').squeeze()
 
             results = []
             for model_file in model_files:
