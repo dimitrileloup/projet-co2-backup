@@ -1010,4 +1010,4 @@ try:
 
 
 except FileNotFoundError:
-    st.error("Fichiers non trouvés. Vérifiez que 'datas_nettoyees_model_FR.csv' est bien dans le même dossier que ce script.")
+    st.error("Fichiers non trouvés.")
