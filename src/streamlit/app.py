@@ -7,6 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+import sklearn
 import kagglehub
 import os
 import warnings
@@ -18,33 +19,39 @@ st.set_page_config(layout="wide")
 from streamlit_javascript import st_javascript
 
 # On récupère l'URL du navigateur
-url = st_javascript("window.location.href")
-environnement = ''
-if url:
-    if "localhost" in url or "127.0.0.1" in url:
-        environnement = "local"
-    else:
-        environnement = "cloud"
+# url = st_javascript("window.location.href")
+# environnement = ''
+# if url:
+#     if "localhost" in url or "127.0.0.1" in url:
+#         environnement = "local"
+#     else:
+#         environnement = "cloud"
 
-    # st.success(f"Environnement détecté : {environnement}")
-    # st.write(f"URL : {url}")
-else:
-    st.warning("En attente du navigateur...")
+#     # st.success(f"Environnement détecté : {environnement}")
+#     # st.write(f"URL : {url}")
+# else:
+#     st.warning("En attente du navigateur...")
 
-if environnement == "local":
-    # Chemins des fichiers en local
-    csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
-    # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
-    path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
-    csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
-    dossier_documents = "documents/"
-else:
-    # chemin des fichiers pour le déploiement sur Streamlit
-    #csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
-    #csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datas_FR_2022_2023.csv"
-    csv_path_dataset_nettoye = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_nettoyees_model_FR.csv"
-    csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_FR_2022_2023.csv"
-    dossier_documents = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/documents/"
+# if environnement == "local":
+#     # Chemins des fichiers en local
+#     csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
+#     # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
+#     path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
+#     csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
+#     dossier_documents = "documents/"
+# else:
+#     # chemin des fichiers pour le déploiement sur Streamlit
+#     #csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
+#     #csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datas_FR_2022_2023.csv"
+#     csv_path_dataset_nettoye = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_nettoyees_model_FR.csv"
+#     csv_path_dataset_original = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/datasets/datas_FR_2022_2023.csv"
+#     dossier_documents = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/documents/"
+
+csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
+# Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
+path = kagglehub.dataset_download("dimitrileloup/vehicules-fr-2022-2023")
+csv_path_dataset_original = f"{path}/datas_FR_2022_2023.csv"
+dossier_documents = "documents/"
 
 
 def load_and_format_csv(file_path):
@@ -779,73 +786,75 @@ try:
     elif section == "🤖 Modélisation":
 
         st.header("🤖 Modélisation des émissions de CO2")
+        import sklearn
+        st.write(f"Version de scikit-learn : {sklearn.__version__}")
 
         import os
-        model_files = ["LinearRegression_model.pkl", "XGBoostRegressor_model.pkl", "Lasso_model.pkl", "DecisionTreeRegressor_model.pkl", "RandomForestRegressor_model.pkl", "Ridge_model.pkl", "SGDRegressor_model.pkl"]  # Exemple de modèles enregistrés
+        model_files = ["LinearRegression_model.pkl", "Lasso_model.pkl", "Ridge_model.pkl", "SGDRegressor_model.pkl", "RandomForestRegressor_model.pkl", "DecisionTreeRegressor_model.pkl", "XGBoostRegressor_model.pkl"]  # Exemple de modèles enregistrés
 
         selected_model_file = st.selectbox("Choisissez un modèle enregistré à charger:", model_files)
 
         try:
             model = joblib.load("models/" + selected_model_file)
-            if isinstance(model, tuple):  # Vérifier si le modèle a été sauvegardé sous forme de tuple
-                preprocessor, model = model  # Extraire le préprocesseur et le modèle
-                X_test = df_nettoye.drop(columns=['CO2'])  # Supprime la colonne cible pour garder uniquement les features
-                X_test_transformed = preprocessor.transform(X_test)
-            elif hasattr(model, 'named_steps') and 'preprocessor' in model.named_steps:
-                preprocessor = model.named_steps['preprocessor']
-                X_test_transformed = preprocessor.transform(X_test)
-            else:
-                X_test = df_nettoye.drop(columns=['CO2'])  # Supprime la colonne cible pour garder uniquement les features
-                X_test_transformed = X_test
+            # X_test = df_nettoye.drop(columns=['CO2', 'Marque', 'Modèle', 'Consommation carburant'], axis=1)
+            # y_test = df_nettoye['CO2']
+            X_test = pd.read_csv('models/X_test.csv')
+            y_test = pd.read_csv('models/y_test.csv').squeeze()
 
-            X_test = df_nettoye.drop(columns=['CO2'])  # Supprime la colonne cible pour garder uniquement les features  # Charger les données de test
-            y_test = df_nettoye['CO2']  # Sélectionne la colonne cible
-
-            y_pred = model.predict(X_test_transformed)
+            y_pred = model.predict(X_test)
 
             r2 = round(r2_score(y_test, y_pred), 2)
             mse = round(mean_squared_error(y_test, y_pred), 2)
             mae = round(mean_absolute_error(y_test, y_pred), 2)
+            rmse = round(np.sqrt(mse), 2)
 
             st.subheader("Performances du modèle chargé")
             st.write(f"**R2 Score** : {r2}")
-            st.write(f"**MSE** : {mse}")
             st.write(f"**MAE** : {mae}")
+            st.write(f"**RMSE** : {rmse}")
 
         except FileNotFoundError:
             st.error("Le modèle sélectionné ou les données de test ne sont pas disponibles. Vérifiez les fichiers.")
 
+
+        # Comparaison de TOUS les modèles enregistrés
         try:
+            # X_test = df_nettoye.drop(columns=['CO2', 'Marque', 'Modèle', 'Consommation carburant'], axis=1)
+            # y_test = df_nettoye['CO2']
+            X_test = pd.read_csv('models/X_test.csv')
+            y_test = pd.read_csv('models/y_test.csv').squeeze()
+
             results = []
             for model_file in model_files:
                 model = joblib.load("models/" + model_file)
+
                 y_pred = model.predict(X_test)
 
-                r2 = round(r2_score(y_test, y_pred), 5)
-                mse = round(mean_squared_error(y_test, y_pred), 5)
-                mae = round(mean_absolute_error(y_test, y_pred), 5)
-                rmse = round(np.sqrt(mse), 5)
-                ratio_rmse_mae = round(rmse - mae, 5) if mae != 0 else None
+                r2 = round(r2_score(y_test, y_pred), 2)
+                mse = round(mean_squared_error(y_test, y_pred), 2)
+                mae = round(mean_absolute_error(y_test, y_pred), 2)
+                rmse = round(np.sqrt(mse), 2)
+                ratio_rmse_mae = round(rmse - mae, 2) if mae != 0 else None
 
-                results.append({"Modèle": model_file, "R2": r2, "MSE": mse, "RMSE": rmse, "MAE": mae, "RMSE - MAE": ratio_rmse_mae})
-
+                results.append({
+                    "Modèle": model_file,
+                    "R2": r2,
+                    "RMSE": rmse,
+                    "MAE": mae
+                })
 
             df_models = pd.DataFrame(results)
             st.subheader("Comparaison des performances des modèles")
             st.dataframe(df_models)
 
             st.subheader("Top 3 meilleurs modèles")
-            #top_3_models = df_models.head(3)
             df_sorted = df_models.sort_values(by=["R2", "RMSE"], ascending=[False, True])
             top_3_models = df_sorted.head(3)
             st.dataframe(top_3_models)
-            # best_model = df_models.sort_values(by='R2', ascending=False).iloc[0]
-            # st.write(f"**Modèle sélectionné** : {best_model['Modèle']}")
-            # st.write(f"- **R2 Score** : {best_model['R2']}")
-            # st.write(f"- **MSE** : {best_model['MSE']}")
-            # st.write(f"- **MAE** : {best_model['MAE']}")
+
         except Exception as e:
             st.error(f"Erreur lors de la comparaison des modèles : {str(e)}")
+
 
     elif section == "🚀 Démo":
         st.header("🚀 Démo : prédiction des Émissions de CO2")
