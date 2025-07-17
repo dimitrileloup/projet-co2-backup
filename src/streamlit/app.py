@@ -42,6 +42,9 @@ if environnement == "local":
     X_test = pd.read_csv('models/X_test.csv')
     y_test = pd.read_csv('models/y_test.csv').squeeze()
 
+    X_train = pd.read_csv('models/X_train.csv')
+    y_train = pd.read_csv('models/y_train.csv').squeeze()
+
 else:
     # chemin des fichiers pour le déploiement sur Streamlit
     #csv_path_dataset_nettoye = "https://raw.githubusercontent.com/dimitrileloup/projet-co2-backup/refs/heads/main/notebooks/datasets/Dataset_final/datas_nettoyees_model_FR.csv"
@@ -187,6 +190,7 @@ section = st.sidebar.radio(
         "Analyse de la variable cible CO2",
         "Analyse des outliers",
         "Modélisation",
+        "Comparaison des modèles",
         "Démo",
         "Conclusion"
     ]
@@ -838,16 +842,169 @@ try:
             st.write(f"**MAE** : {mae}")
             st.write(f"**RMSE** : {rmse}")
 
+
+
+            # from sklearn.model_selection import learning_curve
+            # import plotly.graph_objects as go
+
+            # train_sizes, train_scores, val_scores = learning_curve(
+            #     model, X_train, y_train, cv=5, scoring="neg_mean_absolute_error",
+            #     train_sizes=np.linspace(0.1, 1.0, 10), n_jobs=-1
+            # )
+
+            # df_curve = pd.DataFrame({
+            #     'train_size': np.concatenate([train_sizes, train_sizes]),
+            #     'MAE': np.concatenate([-np.mean(train_scores, axis=1), -np.mean(val_scores, axis=1)]),
+            #     'std': np.concatenate([np.std(train_scores, axis=1), np.std(val_scores, axis=1)]),
+            #     'set': ['Entraînement'] * len(train_sizes) + ['Validation'] * len(train_sizes)
+            # })
+
+            # fig = go.Figure()
+
+            # for label in df_curve['set'].unique():
+            #     subset = df_curve[df_curve['set'] == label]
+            #     fig.add_trace(go.Scatter(
+            #         x=subset['train_size'],
+            #         y=subset['MAE'],
+            #         mode='lines+markers',
+            #         name=label,
+            #         line=dict(shape='linear')
+            #     ))
+
+            #     fig.add_trace(go.Scatter(
+            #         x=np.concatenate([subset['train_size'], subset['train_size'][::-1]]),
+            #         y=np.concatenate([subset['MAE'] - subset['std'], (subset['MAE'] + subset['std'])[::-1]]),
+            #         fill='toself',
+            #         fillcolor='rgba(0,100,80,0.2)',
+            #         line=dict(color='rgba(255,255,255,0)'),
+            #         hoverinfo="skip",
+            #         showlegend=False
+            #     ))
+
+            # fig.update_layout(
+            #     title=f"Courbe d'apprentissage - {selected_display_name}",
+            #     xaxis_title="Nombre d'exemples d'entraînement",
+            #     yaxis_title="Erreur Absolue Moyenne (MAE)",
+            #     legend_title="Jeu de données"
+            # )
+
+            # st.plotly_chart(fig, use_container_width=True)
+
+
+            # Données
+            y_true = y_test.values.ravel()
+            y_pred = model.predict(X_test)
+            residuals = y_true - y_pred
+
+            # ----------- Graphique des résidus -----------
+            fig_residus = go.Figure()
+
+            fig_residus.add_trace(go.Scatter(
+                x=y_pred,
+                y=residuals,
+                mode='markers',
+                name="Résidus",
+                marker=dict(opacity=0.5)
+            ))
+            fig_residus.add_hline(y=0, line=dict(color="red", dash="dash"))
+
+            fig_residus.update_layout(
+                title="Graphique des résidus",
+                xaxis_title="Valeurs prédites",
+                yaxis_title="Résidus",
+                showlegend=True,
+                width=700,
+                height=400
+            )
+
+            st.plotly_chart(fig_residus, use_container_width=True)
+
+            # ----------- Histogramme des erreurs -----------
+            fig_hist = go.Figure()
+
+            fig_hist.add_trace(go.Histogram(
+                x=residuals,
+                nbinsx=30,
+                name="Erreurs",
+                marker=dict(color="blue"),
+                opacity=0.7
+            ))
+            fig_hist.add_vline(x=0, line=dict(color="red", dash="dash"))
+
+            fig_hist.update_layout(
+                title="Histogramme des erreurs",
+                xaxis_title="Erreur (résidu)",
+                yaxis_title="Fréquence",
+                showlegend=True,
+                width=700,
+                height=400
+            )
+
+            st.plotly_chart(fig_hist, use_container_width=True)
+
+
+            # Prédictions
+            y_true = y_test.values.ravel()
+            y_pred = model.predict(X_test)
+
+            # Valeurs min / max pour la ligne idéale y = x
+            min_val = min(y_true.min(), y_pred.min())
+            max_val = max(y_true.max(), y_pred.max())
+
+            # Création de la figure Plotly
+            fig = go.Figure()
+
+            # Nuage de points : prédictions vs valeurs réelles
+            fig.add_trace(go.Scatter(
+                x=y_true, 
+                y=y_pred,
+                mode='markers',
+                name='Valeurs prédites',
+                opacity=0.6
+            ))
+
+            # Ligne y = x (parfaite prédiction)
+            fig.add_trace(go.Scatter(
+                x=[min_val, max_val],
+                y=[min_val, max_val],
+                mode='lines',
+                name='Réel = Prédit',
+                line=dict(color='red', dash='dash')
+            ))
+
+            # Mise en forme
+            fig.update_layout(
+                title="Valeurs réelles vs Prédites",
+                xaxis_title="Valeurs réelles",
+                yaxis_title="Valeurs prédites",
+                showlegend=True,
+                width=600,
+                height=500
+            )
+
+            # Affichage dans Streamlit
+            st.plotly_chart(fig, use_container_width=True)
+
         except FileNotFoundError:
             st.error("Le modèle sélectionné ou les données de test ne sont pas disponibles. Vérifiez les fichiers.")
 
-
+    elif section == "Comparaison des modèles":
         # Comparaison de TOUS les modèles enregistrés
         try:
             # X_test = df_nettoye.drop(columns=['CO2', 'Marque', 'Modèle', 'Consommation carburant'], axis=1)
             # y_test = df_nettoye['CO2']
             # X_test = pd.read_csv('models/X_test.csv')
             # y_test = pd.read_csv('models/y_test.csv').squeeze()
+            model_display_names = {
+                "LinearRegression_model.pkl": "LinearRegression",
+                "Lasso_model.pkl": "Lasso",
+                "Ridge_model.pkl": "Ridge",
+                "SGDRegressor_model.pkl": "SGDRegressor",
+                "RandomForestRegressor_model.pkl": "RandomForestRegressor",
+                "DecisionTreeRegressor_model.pkl": "DecisionTreeRegressor",
+                "GradientBoostingRegressor_model.pkl": "GradientBoostingRegressor",
+                "XGBoostRegressor_model.pkl": "XGBoostRegressor"
+            }
 
             results = []
             for model_file, display_name  in model_display_names.items():
