@@ -786,11 +786,9 @@ try:
     elif section == "🤖 Modélisation":
 
         st.header("🤖 Modélisation des émissions de CO2")
-        import sklearn
-        st.write(f"Version de scikit-learn : {sklearn.__version__}")
 
         import os
-        model_files = ["LinearRegression_model.pkl", "Lasso_model.pkl", "Ridge_model.pkl", "SGDRegressor_model.pkl", "RandomForestRegressor_model.pkl", "DecisionTreeRegressor_model.pkl", "XGBoostRegressor_model.pkl"]  # Exemple de modèles enregistrés
+        model_files = ["LinearRegression_model.pkl", "Lasso_model.pkl", "Ridge_model.pkl", "SGDRegressor_model.pkl", "RandomForestRegressor_model.pkl", "DecisionTreeRegressor_model.pkl", "GradientBoostingRegressor_model.pkl", "XGBoostRegressor_model.pkl"]  # Exemple de modèles enregistrés
 
         selected_model_file = st.selectbox("Choisissez un modèle enregistré à charger:", model_files)
 
@@ -847,10 +845,10 @@ try:
             st.subheader("Comparaison des performances des modèles")
             st.dataframe(df_models)
 
-            st.subheader("Top 3 meilleurs modèles")
+            st.subheader("Top 4 meilleurs modèles")
             df_sorted = df_models.sort_values(by=["R2", "RMSE"], ascending=[False, True])
-            top_3_models = df_sorted.head(3)
-            st.dataframe(top_3_models)
+            top_4_models = df_sorted.head(4)
+            st.dataframe(top_4_models)
 
         except Exception as e:
             st.error(f"Erreur lors de la comparaison des modèles : {str(e)}")
@@ -859,8 +857,21 @@ try:
     elif section == "🚀 Démo":
         st.header("🚀 Démo : prédiction des Émissions de CO2")
 
+        # Sélection du modèle
+        model_choice = st.selectbox(
+            "Choisissez le modèle pour la prédiction :",
+            ["XGBoost", "GradientBoosting", "RandomForest"]
+        )
+
+        # Dictionnaire pour faire correspondre le choix à ton fichier .pkl
+        model_paths = {
+            "XGBoost": "models/XGBoostRegressor_model.pkl",
+            "GradientBoosting": "models/GradientBoostingRegressor_model.pkl",
+            "RandomForest": "models/RandomForestRegressor_model.pkl"
+        }
+
         # Chargement du modèle
-        model_path = "models/XGBoostRegressor_model.pkl"  # Chemin du modèle
+        model_path = model_paths[model_choice]
         loaded_model = joblib.load(model_path)
 
         st.markdown("Entrez les caractéristiques du véhicule pour estimer les émissions de CO2 (g/km).")
