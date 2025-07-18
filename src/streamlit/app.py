@@ -54,6 +54,8 @@ else:
     dossier_documents = "https://huggingface.co/datasets/dleloup/vehicules-co2/resolve/main/documents/"
     X_test = pd.read_csv('https://huggingface.co/datasets/dleloup/x_test/resolve/main/X_test.csv')
     y_test = pd.read_csv('https://huggingface.co/datasets/dleloup/x_test/resolve/main/y_test.csv').squeeze()   
+    X_train = pd.read_csv('https://huggingface.co/datasets/dleloup/x_train/resolve/main/X_train.csv')
+    y_train = pd.read_csv('https://huggingface.co/datasets/dleloup/x_train/resolve/main/X_train.csv').squeeze()   
 
 # csv_path_dataset_nettoye = "datasets/datas_nettoyees_model_FR.csv"
 # # Nous passons par Kaggle car le dataset ne peut être envoyé sur Github : il est trop volumineux. Cela est plus rapide en local aussi.
