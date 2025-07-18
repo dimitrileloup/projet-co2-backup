@@ -189,6 +189,7 @@ section = st.sidebar.radio(
         "Analyse des variables",
         "Analyse de la variable cible CO2",
         "Analyse des outliers",
+        "Préparation à la modélisation",
         "Modélisation",
         "Comparaison des modèles",
         "Démo",
@@ -792,11 +793,213 @@ try:
             # Affichage du boxplot
             st.plotly_chart(fig_outliers)
 
+    elif section == "Préparation à la modélisation":
+
+        st.header("Préparation à la modélisation")
+
+        st.subheader("Sélection des données : variable cible et variables explicatives")
+        st.write("Notre **variable cible** est le CO2.")
+        st.write("Pour prédire celle-ci nous avons dans un premier temps sélectionner les variables explicatives suivantes :")
+        st.markdown("""
+                    - Masse à vide
+                    - Cylindrée moteur
+                    - Puissance moteur
+                    - Consommation carburant
+                    - Carburant
+                    """)
+        
+
+        code_snippet = """
+        # nous faisons une copie du dataset principal
+        df_copy = df.copy()
+        # variables explicatives
+        X = df_copy.drop(columns=['CO2', 'Marque', 'Modèle'], axis=1)
+        # variable cible
+        y = df_copy['CO2']"""
+        st.code(code_snippet, language="python")
+ 
+        st.write("Nous nous sommes aperçus que nous avions des scores R2 à plus de 99%. La variable **Consommation carburant** étant très fortement corrélée avec la variable cible, nous avons pris la décision de la retirer.")
+
+        st.subheader("Pré-processeur")
+        st.write("Afin de standardiser le traitement des données, nous allons appliquer les mêmes étapes de transformation et encodage au jeu de données. Nous passerons par un pré-processeur qui encapsulera ces étapes dans un seul objet pipeline. Il pourra ainsi être rejouer pour tous les modèles que nous voudrons tester.")
+        code_snippet = """
+        def creer_preprocesseur(X, categorical_features):        
+            # Colonnes numériques = toutes sauf les catégorielles
+            numeric_features = X.drop(columns=categorical_features).columns.tolist()
+
+            preprocessor = ColumnTransformer([
+                ('num', StandardScaler(), numeric_features),
+                ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
+            ])
+
+            return preprocessor
+
+            categorical_features = ['Carburant']
+            preprocessor = creer_preprocesseur(X, categorical_features)"""
+        st.code(code_snippet, language="python")
+
+        st.subheader("Séparation des données")
+        code_snippet = """
+        # Split des données
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=24)"""
+        st.code(code_snippet, language="python")
+
+        st.subheader("Entrainement et optimisation des modèles")
+        st.write("Afin de faciliter les entrainements sur les algorithmes, nous avons créé une fonction qui pourra être appelée pour chaque algorithme. Elle permet de :")
+        st.markdown("""
+                    - entraîner un modèle
+                    - l'optimiser par une méthode telle que GridSearchCV ou RandomizedSearchCV
+                    - retourner le meilleur modèle, les meilleurs hyperparamètres, les prédictions et un tableau des résultats avec des métriques (scores, durée d'éxécution ...)
+                    - tracker les résultats dans MLflow""")
+        
+        code_snippet = """
+        def entrainer_et_optimiser_model(model, param_grid, model_name, preprocessor, cv=5, method='GridSearchCV', save_model=True, tracking=False, run_name=''):
+            pipeline = Pipeline([
+                ('preprocessing', preprocessor),
+                ('regressor', model)
+            ])
+
+            scoring = {
+                'r2': 'r2',
+                'neg_mean_absolute_error': 'neg_mean_absolute_error'
+            }
+
+            if method == 'GridSearchCV':
+                search = GridSearchCV(
+                    estimator=pipeline,
+                    param_grid=param_grid,
+                    scoring=scoring,
+                    refit='r2',
+                    cv=cv,
+                    n_jobs=-1,
+                    verbose=2
+                )
+            else:
+                search = RandomizedSearchCV(
+                    estimator=pipeline,
+                    param_distributions=param_grid,
+                    scoring=scoring,
+                    refit='r2',
+                    cv=cv,
+                    n_jobs=-1,
+                    n_iter=5,
+                    verbose=2
+                )
+
+            start_time = time.time()
+            search.fit(X_train, y_train)
+            end_time = time.time()
+            execution_time = end_time - start_time
+
+            best_params = search.best_params_
+            best_model = search.best_estimator_
+
+            # Résultats sur train/test
+            y_pred_train = best_model.predict(X_train)
+            r2_train = r2_score(y_train, y_pred_train)
+            mae_train = mean_absolute_error(y_train, y_pred_train)
+            rmse_train = np.sqrt(mean_squared_error(y_train, y_pred_train))
+
+            y_pred_test = best_model.predict(X_test)
+            r2_test = r2_score(y_test, y_pred_test)
+            mae_test = mean_absolute_error(y_test, y_pred_test)
+            rmse_test = np.sqrt(mean_squared_error(y_test, y_pred_test))
+
+            overfitting_ratio = r2_train - r2_test
+            underfitting_flag = r2_train < 0.80
+
+            # Moyenne du MAE cross-val
+            mae_cv = -search.cv_results_['mean_test_neg_mean_absolute_error'].mean()
+
+            # Sauvegarde du modèle
+            if save_model:
+                chemin_fichier = dossier_modeles + f"{model_name}_model.pkl"
+                joblib.dump(best_model, chemin_fichier)
+                print(f"Le meilleur modèle a été sauvegardé sous le nom : {model_name}_model.pkl")
+            
+            # Sauvegarde de X_test et y_test pour garantir cohérence Streamlit
+            X_test.to_csv(dossier_modeles + f"{model_name}_X_test.csv", index=False)
+            y_test.to_csv(dossier_modeles + f"{model_name}_y_test.csv", index=False)
+            print(f"Le X_test et y_test ont été sauvegardés sous le nom : {model_name}_X_test.csv / _y_test.csv")
+
+
+            print(f"Meilleurs hyperparamètres : {best_params}")
+            print(f"Temps d'exécution : {execution_time:.2f} secondes")
+
+            # Création tableau de résultats
+            results = pd.DataFrame([{
+                'Modèle': model_name,
+                'R² moyen (CV)': search.best_score_,
+                'MAE moyen (CV)': mae_cv,
+                'RMSE train': rmse_train,
+                'MAE train': mae_train,
+                'R2 train': r2_train,
+                'RMSE test': rmse_test,
+                'MAE test': mae_test,
+                'R2 test': r2_test,
+                'Ecart RMSE / MAE test': rmse_test - mae_test,
+                'Ratio overfitting': overfitting_ratio,
+                'Alerte Underfitting': underfitting_flag,
+                'Temps d\'exécution (s)': execution_time
+            }])
+
+            # Tracking MLflow
+            # Au préalable penser à lancer MLFlow via la commande mlflow ui dans le même répertoire que le notebook
+            if tracking:
+                mlflow.set_experiment("Projet CO2")
+                if run_name == '':
+                    run_name = model_name
+                with mlflow.start_run(run_name=run_name) as parent_run:
+
+                    # Log du meilleur modèle
+                    mlflow.log_params(best_params)
+                    mlflow.log_metrics({
+                        'R2_train': r2_train,
+                        'MAE_train': mae_train,
+                        'RMSE_train': rmse_train,
+                        'R2_test': r2_test,
+                        'MAE_test': mae_test,
+                        'RMSE_test': rmse_test,
+                        'MAE_CV': mae_cv,
+                        'Execution_time': execution_time,
+                        'Overfitting_ratio': overfitting_ratio
+                    })
+                    input_example = X_train[:1]  # 1 ligne d’exemple du jeu d'entraînement
+                    mlflow.sklearn.log_model(
+                        sk_model=best_model,
+                        artifact_path=f"{model_name}_model",
+                        input_example=input_example,
+                        signature=mlflow.models.infer_signature(X_train, y_pred_train),
+                        registered_model_name=model_name
+                    )
+
+                    # Log CSV des résultats
+                    cv_results_df = pd.DataFrame(search.cv_results_)
+                    path_csv = f"{dossier_modeles}results/{model_name}_cv_results.csv"
+                    cv_results_df.to_csv(path_csv, index=False)
+                    mlflow.log_artifact(path_csv)
+
+                    # Log chaque itération comme une sous-run
+                    for i, row in cv_results_df.iterrows():
+                        with mlflow.start_run(run_name=f"{model_name}_test_{i}", nested=True):
+                            # Log des paramètres testés
+                            for param in row.index:
+                                if param.startswith("param_"):
+                                    mlflow.log_param(param.replace("param_", ""), row[param])
+                            # Log des scores
+                            mlflow.log_metrics({
+                                'mean_test_r2': row['mean_test_r2'],
+                                'mean_test_mae': -row['mean_test_neg_mean_absolute_error'],
+                                'std_test_r2': row['std_test_r2'],
+                                'rank_test_r2': row['rank_test_r2']
+                            })
+
+            return best_model, best_params, y_pred_test, results
+        """
+        st.code(code_snippet, language="python")      
     elif section == "Modélisation":
+        st.subheader("Métriques")
 
-        st.header("Modélisation des émissions de CO2")
-
-        import os
         model_display_names = {
             "LinearRegression_model.pkl": "LinearRegression",
             "Lasso_model.pkl": "Lasso",
@@ -812,7 +1015,7 @@ try:
         display_to_file = {v: k for k, v in model_display_names.items()}
 
         selected_display_name = st.selectbox(
-            "Choisissez un modèle enregistré à charger :",
+            "Choisissez un modèle :",
             list(display_to_file.keys())
         )
 
@@ -837,58 +1040,59 @@ try:
             mae = round(mean_absolute_error(y_test, y_pred), 2)
             rmse = round(np.sqrt(mse), 2)
 
-            st.subheader("Performances du modèle chargé")
             st.write(f"**R2 Score** : {r2}")
             st.write(f"**MAE** : {mae}")
             st.write(f"**RMSE** : {rmse}")
+            
+            st.subheader(f"Visualisations de {selected_display_name}")
 
+            if selected_display_name == "XGBoostRegressor":
+                st.image("documents/courbe_xgb.png", caption="Courbe d'apprentissage XGBoost")
+            else:
+                from sklearn.model_selection import learning_curve
 
+                train_sizes, train_scores, val_scores = learning_curve(
+                    model, X_train, y_train, cv=5, scoring="neg_mean_absolute_error",
+                    train_sizes=np.linspace(0.1, 1.0, 10), n_jobs=-1
+                )
 
-            # from sklearn.model_selection import learning_curve
-            # import plotly.graph_objects as go
+                df_curve = pd.DataFrame({
+                    'train_size': np.concatenate([train_sizes, train_sizes]),
+                    'MAE': np.concatenate([-np.mean(train_scores, axis=1), -np.mean(val_scores, axis=1)]),
+                    'std': np.concatenate([np.std(train_scores, axis=1), np.std(val_scores, axis=1)]),
+                    'set': ['Entraînement'] * len(train_sizes) + ['Validation'] * len(train_sizes)
+                })
 
-            # train_sizes, train_scores, val_scores = learning_curve(
-            #     model, X_train, y_train, cv=5, scoring="neg_mean_absolute_error",
-            #     train_sizes=np.linspace(0.1, 1.0, 10), n_jobs=-1
-            # )
+                fig = go.Figure()
 
-            # df_curve = pd.DataFrame({
-            #     'train_size': np.concatenate([train_sizes, train_sizes]),
-            #     'MAE': np.concatenate([-np.mean(train_scores, axis=1), -np.mean(val_scores, axis=1)]),
-            #     'std': np.concatenate([np.std(train_scores, axis=1), np.std(val_scores, axis=1)]),
-            #     'set': ['Entraînement'] * len(train_sizes) + ['Validation'] * len(train_sizes)
-            # })
+                for label in df_curve['set'].unique():
+                    subset = df_curve[df_curve['set'] == label]
+                    fig.add_trace(go.Scatter(
+                        x=subset['train_size'],
+                        y=subset['MAE'],
+                        mode='lines+markers',
+                        name=label,
+                        line=dict(shape='linear')
+                    ))
 
-            # fig = go.Figure()
+                    fig.add_trace(go.Scatter(
+                        x=np.concatenate([subset['train_size'], subset['train_size'][::-1]]),
+                        y=np.concatenate([subset['MAE'] - subset['std'], (subset['MAE'] + subset['std'])[::-1]]),
+                        fill='toself',
+                        fillcolor='rgba(0,100,80,0.2)',
+                        line=dict(color='rgba(255,255,255,0)'),
+                        hoverinfo="skip",
+                        showlegend=False
+                    ))
 
-            # for label in df_curve['set'].unique():
-            #     subset = df_curve[df_curve['set'] == label]
-            #     fig.add_trace(go.Scatter(
-            #         x=subset['train_size'],
-            #         y=subset['MAE'],
-            #         mode='lines+markers',
-            #         name=label,
-            #         line=dict(shape='linear')
-            #     ))
+                fig.update_layout(
+                    title=f"Courbe d'apprentissage - {selected_display_name}",
+                    xaxis_title="Nombre d'exemples d'entraînement",
+                    yaxis_title="Erreur Absolue Moyenne (MAE)",
+                    legend_title="Jeu de données"
+                )
 
-            #     fig.add_trace(go.Scatter(
-            #         x=np.concatenate([subset['train_size'], subset['train_size'][::-1]]),
-            #         y=np.concatenate([subset['MAE'] - subset['std'], (subset['MAE'] + subset['std'])[::-1]]),
-            #         fill='toself',
-            #         fillcolor='rgba(0,100,80,0.2)',
-            #         line=dict(color='rgba(255,255,255,0)'),
-            #         hoverinfo="skip",
-            #         showlegend=False
-            #     ))
-
-            # fig.update_layout(
-            #     title=f"Courbe d'apprentissage - {selected_display_name}",
-            #     xaxis_title="Nombre d'exemples d'entraînement",
-            #     yaxis_title="Erreur Absolue Moyenne (MAE)",
-            #     legend_title="Jeu de données"
-            # )
-
-            # st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True)
 
 
             # Données
