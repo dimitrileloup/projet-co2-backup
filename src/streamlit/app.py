@@ -1049,7 +1049,10 @@ try:
             st.subheader(f"Visualisations de {selected_display_name}")
 
             if selected_display_name == "XGBoostRegressor":
-                st.image("documents/courbe_xgb.png", caption="Courbe d'apprentissage XGBoost")
+                if environnement == "local":
+                    st.image("documents/courbe_xgb.png", caption="Courbe d'apprentissage XGBoost")
+                else:
+                    st.image("src/streamlit/documents/courbe_xgb.png", caption="Courbe d'apprentissage XGBoost")
             else:
                 from sklearn.model_selection import learning_curve
 
