@@ -194,8 +194,8 @@ section = st.sidebar.radio(
         "Préparation à la modélisation",
         "Modélisation",
         "Comparaison des modèles",
-        "Démo",
-        "Conclusion"
+        "Conclusion",
+        "Démo"
     ]
 )
 st.sidebar.markdown("---")
@@ -1467,6 +1467,38 @@ try:
         except Exception as e:
             st.error(f"Erreur lors de la comparaison des modèles : {str(e)}")
 
+    elif section == "Conclusion":
+        st.header("Conclusion")
+        st.subheader("Synthèse des résultats")
+        st.write("Les modèles XGBoostRegressor, GradientBoosting et RandomForest offrent les meilleures précisions.")
+        st.write("**XGBoostRegressor :**")
+        st.markdown("""
+        - Précision très élevée
+        - Biais faible
+        - Variance bien contrôlée
+        - Erreurs faiblement dispersées, symétriques
+        - Résidus aléatoires, centrés, sans structure.""")
+
+        st.write("**GradientBoostingRegressor :**")
+        st.markdown("""
+        - Modèle précis
+        - Modèle peu biaisé
+        - Gère très bien les cas extrêmes.""")
+
+        st.write("**RandomForestRegressor :**")
+        st.markdown("""
+        - Prédit très bien sur toutes les plages
+        - Est robuste aux outliers
+        - Gère les interactions complexes entre variables
+        - Montre peu de biais ni de variance""")
+
+        st.subheader("Améliorations futures")
+        st.markdown("""
+                    - Ajout de nouvelles variables (aérodynamisme, type de transmission).
+                    - Mise en production du modèle via une API pour prédire les émissions en temps réel.
+                    - Tracking des tests dans MLFlow
+                    - Etude d'autres modèles : Voting, MLP ...
+                    """)
 
     elif section == "Démo":
         st.header("Démo : prédiction des Émissions de CO2")
@@ -1595,38 +1627,7 @@ try:
 
             #st.info("ℹ️ Comment sont classés les véhicules ?  \n <span class="co2-badge a">A</span> n Classe E :  \n Classe F :   \n Classe G : > 250 g/km")
 
-    elif section == "Conclusion":
-        st.header("Conclusion")
-        st.subheader("Synthèse des résultats")
-        st.write("Les modèles XGBoostRegressor, GradientBoosting et RandomForest offrent les meilleures précisions.")
-        st.write("**XGBoostRegressor :**")
-        st.markdown("""
-        - Précision très élevée
-        - Biais faible
-        - Variance bien contrôlée
-        - Erreurs faiblement dispersées, symétriques
-        - Résidus aléatoires, centrés, sans structure.""")
-
-        st.write("**GradientBoostingRegressor :**")
-        st.markdown("""
-        - Modèle précis
-        - Modèle peu biaisé
-        - Gère très bien les cas extrêmes.""")
-
-        st.write("**RandomForestRegressor :**")
-        st.markdown("""
-        - Prédit très bien sur toutes les plages
-        - Est robuste aux outliers
-        - Gère les interactions complexes entre variables
-        - Montre peu de biais ni de variance""")
-
-        st.subheader("Améliorations futures")
-        st.markdown("""
-                    - Ajout de nouvelles variables (aérodynamisme, type de transmission).
-                    - Mise en production du modèle via une API pour prédire les émissions en temps réel.
-                    - Tracking des tests dans MLFlow
-                    - Etude d'autres modèles : Voting, MLP ...
-                    """)
+    
 
 
 except FileNotFoundError:
