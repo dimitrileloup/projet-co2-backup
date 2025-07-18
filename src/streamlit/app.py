@@ -1048,9 +1048,85 @@ try:
             
             st.subheader(f"Visualisations de {selected_display_name}")
 
+            # -------------- Prédictions --------------
+            y_true = y_test.values.ravel()
+            y_pred = model.predict(X_test)
+
+            # Valeurs min / max pour la ligne idéale y = x
+            min_val = min(y_true.min(), y_pred.min())
+            max_val = max(y_true.max(), y_pred.max())
+
+            # Création de la figure Plotly
+            fig = go.Figure()
+
+            # Nuage de points : prédictions vs valeurs réelles
+            fig.add_trace(go.Scatter(
+                x=y_true, 
+                y=y_pred,
+                mode='markers',
+                name='Valeurs prédites',
+                opacity=0.6
+            ))
+
+            # Ligne y = x (parfaite prédiction)
+            fig.add_trace(go.Scatter(
+                x=[min_val, max_val],
+                y=[min_val, max_val],
+                mode='lines',
+                name='Réel = Prédit',
+                line=dict(color='red', dash='dash')
+            ))
+
+            # Mise en forme
+            fig.update_layout(
+                title="Valeurs réelles vs Prédites",
+                xaxis_title="Valeurs réelles",
+                yaxis_title="Valeurs prédites",
+                showlegend=True,
+                width=600,
+                height=500
+            )
+
+            # Affichage
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Affichage des analyses pour chaque modèle
+            if selected_display_name == "LinearRegression" or selected_display_name == "Lasso" or selected_display_name == "Ridge" or selected_display_name == "SGDRegressor":
+                st.write("Observations :")
+                st.markdown("""
+                - fonctionne bien sur la majorité des cas "moyens".
+                - sous-performe sur les extrêmes (sous-estimation des grandes valeurs)""")
+            elif selected_display_name == "RandomForestRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Les points sont très proches de la diagonale ce qui ndique que le modèle prédit extrêmement bien les vraies valeurs
+                - Peu de dispersion verticale : faible erreur absolue sur presque toutes les plages de valeurs
+                - Même les valeurs extrêmes (jusqu’à 500–600) sont bien captées : le modèle gère bien les cas rares et éloignés""")
+            elif selected_display_name == "DecisionTreeRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - À première vue, ce modèle s’approche beaucoup de RandomForest, mais il a des caractéristiques spécifiques qu’on peut déceler visuellement.""")
+            elif selected_display_name == "GradientBoostingRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Lisse naturellement les prédictions
+                - Gère les extrêmes.""")
+            elif selected_display_name == "XGBoostRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Les points sont proches de la diagonale. Très bonne précision globale
+                - Bien concentré, faible dispersion
+                - Faible erreur de prédiction
+                - Modèle équilibré""")
+
+            # Courbes d'apprentissage
             if selected_display_name == "XGBoostRegressor":
                 if environnement == "local":
                     st.image("documents/courbe_xgb.png", caption="Courbe d'apprentissage XGBoost")
+                    st.write("Observations :")
+                    st.markdown("""
+                    - La MAE validation diminue de 15 à environ 6,3 : le modèle apprend bien avec plus de données
+                    - Gap entre train / validation (Faible et stable (1.5 à 2.0)) : pas de surapprentissage (overfitting maîtrisé)""")        
                 else:
                     st.image("src/streamlit/documents/courbe_xgb.png", caption="Courbe d'apprentissage XGBoost")
             else:
@@ -1099,6 +1175,30 @@ try:
 
                 st.plotly_chart(fig, use_container_width=True)
 
+                if selected_display_name == "LinearRegression" or selected_display_name == "Lasso" or selected_display_name == "Ridge" or selected_display_name == "SGDRegressor":
+                    st.write("Observations :")
+                    st.markdown("""
+                    - Pas de gros écart entre l’erreur d'entraînement et de validation.
+                    - Pas de signe fort de surapprentissage (les deux erreurs restent proches).
+                    - Sous-apprentissage : l'erreur de validation ne baisse pas malgré plus de données, le modèle atteint probablement ses limites de complexité.""")
+                    
+                elif selected_display_name == "DecisionTreeRegressor" :
+                    st.write("Observations :")
+                    st.markdown("""
+                    - Erreur d’entraînement très faible (environ 2.2) : le modèle apprend parfaitement les données vues
+                    - Erreur de validation qui diminue avec plus d’exemples donc le modèle apprend quand même quelque chose""")
+                    st.write("Cependant :")
+                    st.markdown("""
+                    - Gros écart entre entraînement et validation : le modèle s’adapte trop fortement aux données d’apprentissage
+                    - MAE Validation supérieur à 17 au début, puis encore supérieur à 5 ce qui est trop élevé comparé à l'entraînement""")
+                    st.write("**Problème de surapprentissage**")
+                elif selected_display_name == "GradientBoostingRegressor" :
+                    st.write("Observations :")
+                    st.markdown("""
+                    - Les deux courbes baissent progressivement. Le modèle apprend correctement avec plus de données
+                    - Écart faible et stable entre entraînement et validation. Pas de surapprentissage, bonne généralisation
+                    - MAE Validation inférieure à 6.5 en fin de courbe. Très bonne performance
+                    - Courbe lisse : le modèle est stable et régulier dans son comportement""")                           
 
             # Données
             y_true = y_test.values.ravel()
@@ -1128,6 +1228,38 @@ try:
 
             st.plotly_chart(fig_residus, use_container_width=True)
 
+            if selected_display_name == "LinearRegression" or selected_display_name == "Lasso" or selected_display_name == "Ridge":
+                    st.write("Observations :")
+                    st.write("La majorité des points sont proches de la ligne zéro signifiant une bonne précision globale dans les plages centrales. Cependant :")
+                    st.markdown("""
+                    - Les erreurs s’élargissent avec la valeur prédite.
+                    - Résidus positifs très dispersés à droite (> 250 prédits) : le modèle sous-estime fortement les grandes valeurs.""")
+            elif selected_display_name == "RandomForestRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Résidus très concentrés autour de 0 : le modèle a une précision constante sur toutes les plages de prédiction
+                - Les erreurs sont aléatoires ce qui est bon signe, le modèle ne rate pas systématiquement un segments""")
+            elif selected_display_name == "DecisionTreeRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Dispersion importante sur les grandes valeurs
+                - Beaucoup de points extrêmes (outliers)
+                - Résidus en blocs""")
+            elif selected_display_name == "GradientBoostingRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Le graphe des résidus / histogramme des erreurs confirme que c'est pour l'instant le modèle le plus équilibré, précis et robuste.
+                - Résidus globalement centrés autour de 0
+                - Pas de structure visible (nuage bien diffus) : les erreurs sont aléatoires, ce qui est le but
+                - Peu de points extrêmes""")
+            elif selected_display_name == "XGBoostRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Répartition autour de 0 : les résidus sont centrés autour de la ligne rouge y = 0, ce qui signifie que le modèle est globalement non biaisé.
+                - Pas de structure évidente : aucun motif clair ou forme en "U"/"∩" n’apparaît. Cela indique que le modèle capture bien la relation non-linéaire entre les variables explicatives et la cible.
+                - Quelques valeurs extrêmes : on observe quelques résidus supérieurs à 100, mais ils sont rares. Ce sont probablement des outliers.""")
+
+            # elif selected_display_name == "LinearRegression" :
             # ----------- Histogramme des erreurs -----------
             fig_hist = go.Figure()
 
@@ -1151,48 +1283,48 @@ try:
 
             st.plotly_chart(fig_hist, use_container_width=True)
 
+            if selected_display_name == "LinearRegression" or selected_display_name == "Lasso" or selected_display_name == "Ridge":
+                    st.write("Observations :")
+                    st.markdown("""
+                        - **Distribution centrée autour de 0**  
+                        La majorité des erreurs sont faibles et bien centrées, ce qui indique une bonne précision générale du modèle.
 
-            # Prédictions
-            y_true = y_test.values.ravel()
-            y_pred = model.predict(X_test)
+                        - **Asymétrie positive légère**  
+                        On observe une **queue plus longue du côté des erreurs positives**. Cela signifie que le modèle **sous-estime légèrement certaines valeurs**, mais cela reste marginal.
 
-            # Valeurs min / max pour la ligne idéale y = x
-            min_val = min(y_true.min(), y_pred.min())
-            max_val = max(y_true.max(), y_pred.max())
+                        - **Forme proche d'une loi normale**  
+                        La distribution est globalement symétrique, en cloche, mais avec une **légère déviation à droite**.
 
-            # Création de la figure Plotly
-            fig = go.Figure()
+                        - **Présence d'outliers**  
+                        Quelques erreurs importantes sont visibles dans les valeurs positives. Cela traduit des cas où le modèle **n’a pas su prédire correctement des valeurs plus élevées que prévu**.
 
-            # Nuage de points : prédictions vs valeurs réelles
-            fig.add_trace(go.Scatter(
-                x=y_true, 
-                y=y_pred,
-                mode='markers',
-                name='Valeurs prédites',
-                opacity=0.6
-            ))
-
-            # Ligne y = x (parfaite prédiction)
-            fig.add_trace(go.Scatter(
-                x=[min_val, max_val],
-                y=[min_val, max_val],
-                mode='lines',
-                name='Réel = Prédit',
-                line=dict(color='red', dash='dash')
-            ))
-
-            # Mise en forme
-            fig.update_layout(
-                title="Valeurs réelles vs Prédites",
-                xaxis_title="Valeurs réelles",
-                yaxis_title="Valeurs prédites",
-                showlegend=True,
-                width=600,
-                height=500
-            )
-
-            # Affichage dans Streamlit
-            st.plotly_chart(fig, use_container_width=True)
+                        - **Pic net au centre**  
+                        Le sommet de la courbe est marqué, ce qui montre que sur la majorité des observations, le modèle est **stable et précis**.
+                    """)
+            elif selected_display_name == "RandomForestRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Contrairement à LinearRegression, pas d’hétéroscédasticité visible
+                - Très peu d’erreurs > ±40, ce qui est excellent""")
+            elif selected_display_name == "DecisionTreeRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Distribution centrée sur 0
+                - Énorme pic central : le modèle est très bon sur la majorité des cas
+                - Mais queue étalée. Il fait de grosses erreurs sur quelques cas et mémorise certains points au lieu de généraliser
+                - Résidus entre -60 et +150, ce qui suggère un **surapprentissage**""")
+            elif selected_display_name == "GradientBoostingRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Distribution en cloche bien centrée sur 0
+                - Faible largeur : les erreurs sont petites et régulières
+                - Queue droite légèrement plus étalée. Le modèle gère bien les cas extrêmes mais reste prudent""")
+            elif selected_display_name == "XGBoostRegressor" :
+                st.write("Observations :")
+                st.markdown("""
+                - Distribution en cloche (gaussienne) : bien centrée sur zéro, avec une forme proche de la normale.
+                - Symétrie : l’erreur est symétrique, ce qui indique aucun biais fort du modèle.
+                - Queue modérée : les extrémités ne sont pas trop lourdes, donc le modèle gère bien la majorité des cas.""")
 
         except FileNotFoundError:
             st.error("Le modèle sélectionné ou les données de test ne sont pas disponibles. Vérifiez les fichiers.")
@@ -1467,6 +1599,27 @@ try:
         st.header("Conclusion")
         st.subheader("Synthèse des résultats")
         st.write("Les modèles XGBoostRegressor, GradientBoosting et RandomForest offrent les meilleures précisions.")
+        st.write("**XGBoostRegressor :**")
+        st.markdown("""
+        - Précision très élevée
+        - Biais faible
+        - Variance bien contrôlée
+        - Erreurs faiblement dispersées, symétriques
+        - Résidus aléatoires, centrés, sans structure.""")
+
+        st.write("**GradientBoostingRegressor :**")
+        st.markdown("""
+        - Modèle précis
+        - Modèle peu biaisé
+        - Gère très bien les cas extrêmes.""")
+
+        st.write("**RandomForestRegressor :**")
+        st.markdown("""
+        - Prédit très bien sur toutes les plages
+        - Est robuste aux outliers
+        - Gère les interactions complexes entre variables
+        - Montre peu de biais ni de variance""")
+
         st.subheader("Améliorations futures")
         st.markdown("""
                     - Ajout de nouvelles variables (aérodynamisme, type de transmission).
